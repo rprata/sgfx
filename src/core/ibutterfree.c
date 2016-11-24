@@ -10,19 +10,19 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
 	m_bfs->fbfd = open(FB, O_RDWR);
     if (m_bfs->fbfd == -1)
     {
-        perror("Error: cannot open framebuffer device");
+        ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Error: cannot open framebuffer device");
         return IBUTTERFREE_ERROR;
     }
 
     if (ioctl(m_bfs->fbfd, FBIOGET_FSCREENINFO, &m_bfs->finfo) == -1) 
     {
-        perror("Error: reading fixed information");
+        ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Error: reading fixed information");
         return IBUTTERFREE_ERROR;
     }
 
     if (ioctl(m_bfs->fbfd, FBIOGET_VSCREENINFO, &m_bfs->vinfo) == -1) 
     {
-        perror("Error: reading variable information");
+        ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Error: reading variable information");
         return IBUTTERFREE_ERROR;
     }
 
@@ -31,7 +31,7 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
     m_bfs->fbp = (char *) mmap(0, m_bfs->screensize, PROT_READ | PROT_WRITE, MAP_SHARED, m_bfs->fbfd, 0);
     if (m_bfs->fbp == NULL) 
     {
-        perror("Error: failed to map framebuffer device to memory");
+        ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Error: failed to map framebuffer device to memory");
         return IBUTTERFREE_ERROR;
     }
 
@@ -40,9 +40,12 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
 
 void ibutterfree_close(void)
 {
-	free(m_bfs);
-	m_bfs = NULL;
-	close(m_bfs->fbfd);
+    if (m_bfs) 
+    {
+        close(m_bfs->fbfd);
+        free(m_bfs);
+        m_bfs = NULL;
+    }
 }
 
 
@@ -50,7 +53,7 @@ IBUTTERFREE_RET ibutterfree_create_bf(IButterFreeStruct * bfs)
 {
 	if (m_bfs == NULL) 
 	{
-		perror("Error: failed to create bf");
+		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Error: failed to create bf");
 		return IBUTTERFREE_ERROR;
 	}
 	memcpy(bfs, m_bfs, sizeof(IButterFreeStruct));

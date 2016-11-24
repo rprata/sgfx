@@ -10,6 +10,8 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
+#include "ibutterfree_log.h"
+
 #define FB "/dev/fb0"
 
 typedef enum IBUTTERFREE_RET {

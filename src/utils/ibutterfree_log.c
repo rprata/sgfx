@@ -7,7 +7,9 @@ void ibutterfree_set_msg_level(IBUTTERFREE_MSG_LEVEL msg_level)
 
 void ibutterfree_log(IBUTTERFREE_MSG_LEVEL msg_level_msg, const char * fmt, ...)
 {
-	if (msg_level_msg > IBUTTERFREE_MSG_LEVEL_NONE && msg_level_msg < m_msg_level) 
+	if (msg_level_msg > IBUTTERFREE_MSG_LEVEL_NONE && 
+		msg_level_msg < IBUTTERFREE_MSG_LEVEL_ALL &&
+		msg_level_msg <= m_msg_level) 
 	{
 		char buffer[4096];
 		va_list args;
