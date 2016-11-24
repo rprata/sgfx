@@ -19,7 +19,7 @@ typedef enum IBUTTERFREE_RET {
 	IBUTTERFREE_OK,
 } IBUTTERFREE_RET;
 
-typedef struct IButterFreeStruct_ST {
+typedef struct IButterFreeStruct {
 	int fbfd;
 	struct fb_var_screeninfo vinfo;
 	struct fb_fix_screeninfo finfo;

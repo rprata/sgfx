@@ -22,10 +22,10 @@ typedef enum IBUTTERFREE_MSG_LEVEL {
 	IBUTTERFREE_MSG_LEVEL_ALL = 6
 } IBUTTERFREE_MSG_LEVEL;
 
-#ifndef IBUTTERFREE_MSG_DBG
-	static IBUTTERFREE_MSG_LEVEL m_msg_level = IBUTTERFREE_MSG_LEVEL_NONE;
+#ifndef IBUTTERFREE_DBG_MODE
+	__attribute__((unused)) static IBUTTERFREE_MSG_LEVEL m_msg_level = IBUTTERFREE_MSG_LEVEL_NONE;
 #else
-	static IBUTTERFREE_MSG_LEVEL m_msg_level = IBUTTERFREE_MSG_LEVEL_DEBUG;
+	__attribute__((unused)) static IBUTTERFREE_MSG_LEVEL m_msg_level = IBUTTERFREE_MSG_LEVEL_ALL;
 #endif
 
 void ibutterfree_set_msg_level(IBUTTERFREE_MSG_LEVEL msg_level);
