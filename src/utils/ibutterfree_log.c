@@ -13,7 +13,7 @@ void ibutterfree_log(IBUTTERFREE_MSG_LEVEL msg_level_msg, const char * fmt, ...)
 		va_list args;
 	    va_start(args, fmt);
 	    vsnprintf(buffer, sizeof(buffer), fmt, args);
-	    switch msg_level_msg {
+	    switch (msg_level_msg) {
 	    	case IBUTTERFREE_MSG_LEVEL_TRACK:
 	    		printf(ANSI_COLOR_CYAN "[TRACK][%s - %s:%d] %s" ANSI_COLOR_CYAN "\n", __func__, __FILE__, __LINE__, buffer);
 	    		break;

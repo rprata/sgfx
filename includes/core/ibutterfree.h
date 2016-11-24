@@ -2,8 +2,9 @@
 #define __IBUTTERFREE_H__
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <sys/mman.h>
@@ -11,10 +12,10 @@
 
 #define FB "/dev/fb0"
 
-enum IBUTTERFREE_RET {
+typedef enum IBUTTERFREE_RET {
 	IBUTTERFREE_ERROR,
 	IBUTTERFREE_OK,
-};
+} IBUTTERFREE_RET;
 
 typedef struct IButterFreeStruct_ST {
 	int fbfd;
