@@ -5,7 +5,7 @@
 ## What is IButterFree?
 IButterFree is a set of graphics APIs implemented on top of the Linux Frame Buffer (fbdev) abstraction layer. 
 
-## Goals of IButterFree Library
+## Goals of IButterFree
 * Small memory Footprint;
 * Maximize utilities of hardware acceleration;
 * Support of advanced graphics operations such as multiple alpha blending modes;
@@ -18,5 +18,6 @@ IButterFree requires [CMake](https://cmake.org/) to compile.
 $ cd ibutterfree
 $ mkdir build
 $ cmake CMakeLists.txt -Bbuild
+$ cd build
 $ make
 ```

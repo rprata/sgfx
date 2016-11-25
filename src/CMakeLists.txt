@@ -1,6 +1,7 @@
 add_library (ibutterfree SHARED
 		core/ibutterfree.c
 		core/ibutterfree_surface.c
+		core/ibutterfree_draw.c
 		utils/ibutterfree_log.c
 		)
 
