@@ -42,11 +42,11 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface * surface, in
 	{
 		if (surface->desc->buffer == SINGLE)
 		{
-			surface->mainscreenbuffer[px + py * surface->desc->width] = rgba;
+			surface->frontscreenbuffer[px + py * surface->desc->width] = rgba;
 		}
 		else
 		{
-			surface->offscreenbuffer[px + py * surface->desc->width]  = rgba;
+			surface->backscreenbuffer[px + py * surface->desc->width]  = rgba;
 		}
 		return IBUTTERFREE_OK;
 	}
@@ -141,6 +141,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 
 IBUTTERFREE_RET ibutterfree_draw_circle(IButterFreeSurface * surface, double cx, double cy, int radius)
 {
+	// Using Midpoint Circle Algorithm
 	inline void plot4points(IButterFreeSurface * surface, double cx, double cy, double x, double y, uint32_t rgba)
 	{
 		__ibutterfree_draw_screenbuffer(surface, cx + x, cy + y, surface->desc->color);		
@@ -177,8 +178,6 @@ IBUTTERFREE_RET ibutterfree_draw_circle(IButterFreeSurface * surface, double cx,
 	return IBUTTERFREE_OK;
 }
 
-
-
 IBUTTERFREE_RET ibutterfree_set_color(IButterFreeSurface * surface, int32_t color)
 {
 	surface->desc->color = color;
@@ -192,7 +191,7 @@ IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface)
 		int i = 0;
 		for (i = 0; i < surface->desc->width * surface->desc->height; i += 1)
 		{
-			__ibutterfree_draw_pixel(i % surface->desc->width, i / surface->desc->width, surface->mainscreenbuffer[i]);
+			__ibutterfree_draw_pixel(i % surface->desc->width, i / surface->desc->width, surface->frontscreenbuffer[i]);
 		}
 		return IBUTTERFREE_OK;
 	}

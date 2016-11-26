@@ -29,25 +29,25 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 	}
 
 	long screenbuffersize =  sizeof(int32_t) * surface->desc->width * surface->desc->height;
-	
-	surface->mainscreenbuffer = (int32_t *) malloc(screenbuffersize);
-	if (!surface->mainscreenbuffer)
+
+	surface->frontscreenbuffer = (int32_t *) malloc(screenbuffersize);
+	if (!surface->frontscreenbuffer)
 	{
 		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "MainScreeBuffer cannot be created");
 		return IBUTTERFREE_ERROR;
 	}
 
-	memset(surface->mainscreenbuffer, (int32_t) 0xFFFFFFFF, screenbuffersize);
+	memset(surface->frontscreenbuffer, (int32_t) 0xFFFFFFFF, screenbuffersize);
 
 	if (surface->desc->buffer == DOUBLE)
 	{
-		surface->offscreenbuffer = (int32_t *)malloc(screenbuffersize);
-		if (!surface->offscreenbuffer)
+		surface->backscreenbuffer = (int32_t *)malloc(screenbuffersize);
+		if (!surface->backscreenbuffer)
 		{
-			ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "OffScreenBuffer cannot be created");
+			ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "backscreenbuffer cannot be created");
 			return IBUTTERFREE_ERROR;
 		}
-		memset(surface->offscreenbuffer, (int32_t)0xFFFFFFFF, screenbuffersize);
+		memset(surface->backscreenbuffer, (int32_t)0xFFFFFFFF, screenbuffersize);
 	}
 
 	surface->desc->color = 0x000000FF;
@@ -60,17 +60,17 @@ void ibutterfree_destroy_surface(IButterFreeSurface * surface)
 	if (surface)
 	{
 		ibutterfree_surface_counter--;
-		if (surface->mainscreenbuffer)
+		if (surface->frontscreenbuffer)
 		{
-			free(surface->mainscreenbuffer);
-			surface->mainscreenbuffer = NULL;
+			free(surface->frontscreenbuffer);
+			surface->frontscreenbuffer = NULL;
 		}
 		if (surface->desc->buffer == DOUBLE)
 		{
-			if (surface->offscreenbuffer)
+			if (surface->backscreenbuffer)
 			{
-				free(surface->offscreenbuffer);
-				surface->offscreenbuffer = NULL;
+				free(surface->backscreenbuffer);
+				surface->backscreenbuffer = NULL;
 			}
 		}
 		if (surface->desc) 
@@ -130,4 +130,18 @@ IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * i
 		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Error to get surface id [surface is NULL]");		
 	}
 	return IBUTTERFREE_OK;
+}
+
+IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t color)
+{
+	if (surface)
+	{
+		wmemset(surface->frontscreenbuffer, color, surface->desc->width * surface->desc->height);
+		return IBUTTERFREE_OK;
+	}
+	else
+	{
+		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Failed to clear surface");
+		return IBUTTERFREE_ERROR;
+	}
 }

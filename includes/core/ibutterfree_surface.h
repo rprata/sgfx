@@ -3,6 +3,7 @@
 
 #include "ibutterfree.h"
 #include <stdint.h>
+#include <wchar.h>
 
 typedef enum IButterFreeSurfaceBuffer {
 	SINGLE, 
@@ -25,8 +26,8 @@ typedef struct IButterFreeSurfaceDescription {
 typedef struct IButterFreeSurface {
 	int id;
 	IButterFreeSurfaceDescription * desc;
-	int32_t * mainscreenbuffer;
-	int32_t * offscreenbuffer;
+	int32_t * frontscreenbuffer;
+	int32_t * backscreenbuffer;
 } IButterFreeSurface;
 
 IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
@@ -34,5 +35,6 @@ void ibutterfree_destroy_surface(IButterFreeSurface * surface);
 IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
 IBUTTERFREE_RET ibutterfree_surface_get_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
 IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * id);
+IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t color);
 
 #endif
