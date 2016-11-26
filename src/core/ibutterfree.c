@@ -35,7 +35,8 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         {
             ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Failed to map framebuffer device to memory");
             return IBUTTERFREE_ERROR;
-        }
+        }        	
+        memset(m_bfs->fbp, 0xFF, m_bfs->screensize);
     }
 
 	return IBUTTERFREE_OK;
@@ -45,20 +46,9 @@ void ibutterfree_close(void)
 {
     if (m_bfs) 
     {
+    	munmap(m_bfs->fbp, m_bfs->screensize);
         close(m_bfs->fbfd);
         free(m_bfs);
         m_bfs = NULL;
     }
-}
-
-
-IBUTTERFREE_RET ibutterfree_create_bf(IButterFreeStruct * bfs)
-{
-	if (!m_bfs) 
-	{
-		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Failed to create bfs");
-		return IBUTTERFREE_ERROR;
-	}
-	memcpy(bfs, m_bfs, sizeof(IButterFreeStruct));
-	return IBUTTERFREE_OK;
 }

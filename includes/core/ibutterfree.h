@@ -31,6 +31,5 @@ IButterFreeStruct * m_bfs;
 
 IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv);
 void ibutterfree_close(void);
-IBUTTERFREE_RET ibutterfree_create_bf(IButterFreeStruct * bfs);
 
 #endif
