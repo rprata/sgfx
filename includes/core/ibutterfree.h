@@ -25,6 +25,7 @@ typedef struct IButterFreeStruct {
 	struct fb_fix_screeninfo finfo;
 	long int screensize;
 	char *fbp;
+	char *bbp;
 } IButterFreeStruct;
 
 IButterFreeStruct * m_bfs;

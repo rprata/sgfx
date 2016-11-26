@@ -30,13 +30,17 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
 
         m_bfs->screensize = m_bfs->vinfo.xres * m_bfs->vinfo.yres * m_bfs->vinfo.bits_per_pixel / 8;
 
-        m_bfs->fbp = (char *) mmap(0, m_bfs->screensize, PROT_READ | PROT_WRITE, MAP_SHARED, m_bfs->fbfd, 0);
-        if (m_bfs->fbp == NULL) 
+        m_bfs->fbp = (char *) mmap(0, m_bfs->screensize, PROT_READ | PROT_WRITE, MAP_SHARED, m_bfs->fbfd, (off_t) 0);
+  		m_bfs->bbp = (char *) mmap(0, m_bfs->screensize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0);
+        
+        if (!m_bfs->fbp && !m_bfs->bbp) 
         {
             ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Failed to map framebuffer device to memory");
             return IBUTTERFREE_ERROR;
-        }        	
+        }
+
         memset(m_bfs->fbp, 0xFF, m_bfs->screensize);
+    	memset(m_bfs->bbp, 0xFF, m_bfs->screensize);
     }
 
 	return IBUTTERFREE_OK;
@@ -47,7 +51,8 @@ void ibutterfree_close(void)
     if (m_bfs) 
     {
     	munmap(m_bfs->fbp, m_bfs->screensize);
-        close(m_bfs->fbfd);
+    	munmap(m_bfs->bbp, m_bfs->screensize);
+    	close(m_bfs->fbfd);
         free(m_bfs);
         m_bfs = NULL;
     }

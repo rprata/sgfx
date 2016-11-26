@@ -14,18 +14,22 @@ int main (int argc, char ** argv)
 		desc.height = 720;
 		desc.color = (int32_t) 0x000000FF;
 		desc.type = PRIMARY;
-		desc.buffer = DOUBLE;
+		desc.buffer = SINGLE;
 		if(ibutterfree_create_surface(&surface, &desc) == IBUTTERFREE_OK)
 		{
 			ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
 			ibutterfree_set_color(&surface, (int32_t)0x00FF00FF);
 			int i = 1000;
-			for (i = 300; i >= 0; i -= 40)
+			while(1)
 			{
-				ibutterfree_draw_circle(&surface, 640, 360, i);
+				for (i = 300; i >= 0; i -= 1)
+				{
+					ibutterfree_draw_circle(&surface, 640, 360, i);
+					ibutterfree_flip(&surface);
+					usleep(1000);
+					ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
+				}
 			}
-
-			ibutterfree_flip(&surface);
 			ibutterfree_destroy_surface(&surface);
 		}		
 	}

@@ -30,25 +30,14 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 
 	long screenbuffersize =  sizeof(int32_t) * surface->desc->width * surface->desc->height;
 
-	surface->frontscreenbuffer = (int32_t *) malloc(screenbuffersize);
-	if (!surface->frontscreenbuffer)
+	surface->screenbuffer = (int32_t *) malloc(screenbuffersize);
+	if (!surface->screenbuffer)
 	{
-		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "MainScreeBuffer cannot be created");
+		ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "ScreenBuffer cannot be created");
 		return IBUTTERFREE_ERROR;
 	}
 
-	memset(surface->frontscreenbuffer, (int32_t) 0xFFFFFFFF, screenbuffersize);
-
-	if (surface->desc->buffer == DOUBLE)
-	{
-		surface->backscreenbuffer = (int32_t *)malloc(screenbuffersize);
-		if (!surface->backscreenbuffer)
-		{
-			ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "backscreenbuffer cannot be created");
-			return IBUTTERFREE_ERROR;
-		}
-		memset(surface->backscreenbuffer, (int32_t)0xFFFFFFFF, screenbuffersize);
-	}
+	memset(surface->screenbuffer, (int32_t) 0xFFFFFFFF, screenbuffersize);
 
 	surface->desc->color = 0x000000FF;
 
@@ -60,18 +49,10 @@ void ibutterfree_destroy_surface(IButterFreeSurface * surface)
 	if (surface)
 	{
 		ibutterfree_surface_counter--;
-		if (surface->frontscreenbuffer)
+		if (surface->screenbuffer)
 		{
-			free(surface->frontscreenbuffer);
-			surface->frontscreenbuffer = NULL;
-		}
-		if (surface->desc->buffer == DOUBLE)
-		{
-			if (surface->backscreenbuffer)
-			{
-				free(surface->backscreenbuffer);
-				surface->backscreenbuffer = NULL;
-			}
+			free(surface->screenbuffer);
+			surface->screenbuffer = NULL;
 		}
 		if (surface->desc) 
 		{
@@ -136,7 +117,7 @@ IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t 
 {
 	if (surface)
 	{
-		wmemset(surface->frontscreenbuffer, color, surface->desc->width * surface->desc->height);
+		wmemset(surface->screenbuffer, color, surface->desc->width * surface->desc->height);
 		return IBUTTERFREE_OK;
 	}
 	else

@@ -26,8 +26,7 @@ typedef struct IButterFreeSurfaceDescription {
 typedef struct IButterFreeSurface {
 	int id;
 	IButterFreeSurfaceDescription * desc;
-	int32_t * frontscreenbuffer;
-	int32_t * backscreenbuffer;
+	int32_t * screenbuffer;
 } IButterFreeSurface;
 
 IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);

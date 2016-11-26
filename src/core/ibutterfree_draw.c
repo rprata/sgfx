@@ -1,22 +1,41 @@
 #include "ibutterfree_draw.h"
 #include "ibutterfree_definitions.h"
 
-IBUTTERFREE_RET __ibutterfree_draw_pixel(int px, int py, int32_t rgba)
+IBUTTERFREE_RET __ibutterfree_swap_buffers(void)
+{
+	// char * tmp = (char *)malloc(m_bfs->screensize);
+	// memcpy(tmp, m_bfs->fbp, m_bfs->screensize);
+	memcpy(m_bfs->fbp, m_bfs->bbp, m_bfs->screensize);
+	// memcpy(m_bfs->bbp, tmp, m_bfs->screensize);
+	// free(tmp);
+	// tmp = NULL;
+	return IBUTTERFREE_OK;
+}
+
+IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface * surface, int px, int py, int32_t rgba)
 {
 	if (m_bfs)
 	{
 		struct fb_var_screeninfo vinfo = m_bfs->vinfo;
 		struct fb_fix_screeninfo finfo = m_bfs->finfo;
-		char * fbp = m_bfs->fbp;
+		char * bp;
+		if (surface->desc->buffer == DOUBLE)
+		{
+			bp = m_bfs->bbp;
+		}
+		else
+		{
+			bp = m_bfs->fbp;
+		}
 
 		long location = (px+vinfo.xoffset) * (vinfo.bits_per_pixel / 8) + (py+vinfo.yoffset) * finfo.line_length;
 
 		if (vinfo.bits_per_pixel == 32)
 		{
-            *(fbp + location) = (rgba & 0xFF000000) >> 24;       // blue
-            *(fbp + location + 1) = (rgba & 0x00FF0000) >> 16;   // green
-            *(fbp + location + 2) = (rgba & 0x0000FF00) >> 8;    // red
-            *(fbp + location + 3) = (rgba & 0x000000FF);      	 // transparency
+            *(bp + location) = (rgba & 0xFF000000) >> 24;       // blue
+            *(bp + location + 1) = (rgba & 0x00FF0000) >> 16;   // green
+            *(bp + location + 2) = (rgba & 0x0000FF00) >> 8;    // red
+            *(bp + location + 3) = (rgba & 0x000000FF);      	 // transparency
         } 
         else //assume 16bpp
         { 
@@ -24,7 +43,7 @@ IBUTTERFREE_RET __ibutterfree_draw_pixel(int px, int py, int32_t rgba)
             int g = (rgba & 0x00FF0000) >> 16; 					 // green
             int r = (rgba & 0x0000FF00) >> 8; 					 // red
             unsigned short int t = r << 11 | g << 5 | b;
-            *((unsigned short int *)(fbp + location)) = t;
+            *((unsigned short int *)(bp + location)) = t;
 		}
 
 		return IBUTTERFREE_OK;
@@ -40,14 +59,7 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface * surface, in
 
 	if (surface) 
 	{
-		if (surface->desc->buffer == SINGLE)
-		{
-			surface->frontscreenbuffer[px + py * surface->desc->width] = rgba;
-		}
-		else
-		{
-			surface->backscreenbuffer[px + py * surface->desc->width]  = rgba;
-		}
+		surface->screenbuffer[px + py * surface->desc->width] = rgba;
 		return IBUTTERFREE_OK;
 	}
 	else
@@ -189,10 +201,17 @@ IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface)
 	if (surface && m_bfs)
 	{
 		int i = 0;
+		
 		for (i = 0; i < surface->desc->width * surface->desc->height; i += 1)
 		{
-			__ibutterfree_draw_pixel(i % surface->desc->width, i / surface->desc->width, surface->frontscreenbuffer[i]);
+			__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
 		}
+
+		if (surface->desc->buffer == DOUBLE)
+		{
+			__ibutterfree_swap_buffers();
+		}
+
 		return IBUTTERFREE_OK;
 	}
 	else
