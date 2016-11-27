@@ -153,41 +153,73 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 
 IBUTTERFREE_RET ibutterfree_draw_circle(IButterFreeSurface * surface, double cx, double cy, int radius)
 {
-	// Using Midpoint Circle Algorithm
-	inline void plot4points(IButterFreeSurface * surface, double cx, double cy, double x, double y, uint32_t rgba)
+	if (surface)
 	{
-		__ibutterfree_draw_screenbuffer(surface, cx + x, cy + y, surface->desc->color);		
-		__ibutterfree_draw_screenbuffer(surface, cx - x, cy + y, surface->desc->color);		
-		__ibutterfree_draw_screenbuffer(surface, cx + x, cy - y, surface->desc->color);		
-		__ibutterfree_draw_screenbuffer(surface, cx - x, cy - y, surface->desc->color);		
-	}
-
-	inline void plot8points(IButterFreeSurface * surface, double cx, double cy, double x, double y, uint32_t rgba)
-	{
-		plot4points(surface, cx, cy, x, y, rgba);
-		plot4points(surface, cx, cy, y, x, rgba);
-	}
-
-	int error = -radius;
-	double x = radius;
-	double y = 0;
-
-	while (x >= y)
-	{
-		plot8points(surface, cx, cy, x, y, surface->desc->color);
-
-		error += y;
-		y++;
-		error += y;
-
-		if (error >= 0)
+		// Using Midpoint Circle Algorithm
+		inline void plot4points(IButterFreeSurface * surface, double cx, double cy, double x, double y, uint32_t rgba)
 		{
-			error += -x;
-			x--;
-			error += -x;
+			__ibutterfree_draw_screenbuffer(surface, cx + x, cy + y, surface->desc->color);		
+			__ibutterfree_draw_screenbuffer(surface, cx - x, cy + y, surface->desc->color);		
+			__ibutterfree_draw_screenbuffer(surface, cx + x, cy - y, surface->desc->color);		
+			__ibutterfree_draw_screenbuffer(surface, cx - x, cy - y, surface->desc->color);		
 		}
+
+		inline void plot8points(IButterFreeSurface * surface, double cx, double cy, double x, double y, uint32_t rgba)
+		{
+			plot4points(surface, cx, cy, x, y, rgba);
+			plot4points(surface, cx, cy, y, x, rgba);
+		}
+
+		int error = -radius;
+		double x = radius;
+		double y = 0;
+
+		while (x >= y)
+		{
+			plot8points(surface, cx, cy, x, y, surface->desc->color);
+
+			error += y;
+			y++;
+			error += y;
+
+			if (error >= 0)
+			{
+				error += -x;
+				x--;
+				error += -x;
+			}
+		}
+		return IBUTTERFREE_OK;
 	}
-	return IBUTTERFREE_OK;
+	else
+	{
+		IBUTTERFREE_ERROR("ibutterfree_draw_circle has failed");
+		return IBUTTERFREE_ERROR;
+	}
+}
+
+IBUTTERFREE_RET ibutterfree_draw_rect(IButterFreeSurface * surface, int x0, int y0, int w, int h)
+{
+	if (surface) 
+	{
+		if (h <= 0 && w <= 0)
+		{
+			IBUTTERFREE_ERROR("Wrong values for width and height");
+			return IBUTTERFREE_ERROR;
+		}
+		int x1 = x0 + w;
+		int y1 = y0 + h;
+		__draw_horizontal_line(surface, x0, x1, y0, surface->desc->color);
+		__draw_horizontal_line(surface, x0, x1, y1, surface->desc->color);
+		__draw_vertical_line(surface, x0, y0, y1, surface->desc->color);
+		__draw_vertical_line(surface, x1, y0, y1, surface->desc->color);
+		return IBUTTERFREE_OK;
+	}
+	else
+	{
+		IBUTTERFREE_ERROR("ibutterfree_draw_circle has failed");		
+		return IBUTTERFREE_ERROR;
+	}
 }
 
 IBUTTERFREE_RET ibutterfree_set_color(IButterFreeSurface * surface, int32_t color)
