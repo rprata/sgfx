@@ -39,8 +39,8 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
             return IBUTTERFREE_ERROR;
         }
 
-        memset(m_bfs->fbp, 0xFF, m_bfs->screensize);
-    	memset(m_bfs->bbp, 0xFF, m_bfs->screensize);
+        memset(m_bfs->fbp, 0x00, m_bfs->screensize);
+    	memset(m_bfs->bbp, 0x00, m_bfs->screensize);
     }
 
 	return IBUTTERFREE_OK;

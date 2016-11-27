@@ -92,7 +92,7 @@ IBUTTERFREE_RET ibutterfree_draw_point(IButterFreeSurface * surface, int px, int
 	}
 	else
 	{
-		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_point has failed")
+		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_point has failed");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -162,7 +162,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 			}
 			else
 			{
-				IBUTTERFREE_LOG_ERROR("Invalid value for y.")
+				IBUTTERFREE_LOG_ERROR("Invalid value for y.");
 				return IBUTTERFREE_ERROR;
 			}
 		}
@@ -288,15 +288,31 @@ IBUTTERFREE_RET ibutterfree_fill_circle(IButterFreeSurface * surface, double cx,
 	if (surface)
 	{
 		ibutterfree_draw_circle(surface, cx, cy, radius);
-		int x0 = abs(cx - radius);
-		int x1 = cx + radius;
-		int y0 = abs(cy - radius);
-		int y1 = cy + radius;
+		double x0, x1, y0, y1;
+		if (2 * radius < surface->desc->width)
+		{
+			x0 = abs(cx - radius);
+			x1 = abs(cx + radius);
+		}
+		else
+		{
+			x0 = 0;
+			x1 = surface->desc->width;
+		}
+		if (2 * radius < surface->desc->height)
+		{
+			y0 = abs(cy - radius);
+			y1 = abs(cy + radius);
+		}
+		else
+		{
+			y0 = 0;
+			y1 = surface->desc->height;
+		}
 		int i = 0;
 		int j = 0;
-		int dx;
-		int dy;
-
+		double dx;
+		double dy;
 
 		for (i = x0; i < x1; i++)
 		{
@@ -314,18 +330,12 @@ IBUTTERFREE_RET ibutterfree_fill_circle(IButterFreeSurface * surface, double cx,
 				}
 				if (dx + dy <= radius)
 				{
-					if (i >= 0 && i <= surface->desc->width && j >= 0 && j <= surface->desc->height)
-					{
-						__ibutterfree_draw_screenbuffer(surface, i, j, surface->desc->color);
-					}
+					__ibutterfree_draw_screenbuffer(surface, i, j, surface->desc->color);
 					continue;
 				} 
 				if (dx*dx + dy*dy <= radius*radius)
 				{
-					if (i >= 0 && i <= surface->desc->width && j >= 0 && j <= surface->desc->height)
-					{
-						__ibutterfree_draw_screenbuffer(surface, i, j, surface->desc->color);
-					}
+					__ibutterfree_draw_screenbuffer(surface, i, j, surface->desc->color);
 				}
 			}
 		}

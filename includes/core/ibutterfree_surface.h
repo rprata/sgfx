@@ -32,6 +32,7 @@ typedef struct IButterFreeSurface {
 
 IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
 void ibutterfree_destroy_surface(IButterFreeSurface * surface);
+IBUTTERFREE_RET ibutterfree_get_resolution(IButterFreeSurface * surface, int * xres, int * yres);
 IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
 IBUTTERFREE_RET ibutterfree_surface_get_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
 IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * id);

@@ -9,21 +9,24 @@ int main (int argc, char ** argv)
 	{
 		IButterFreeSurface surface;
 		IButterFreeSurfaceDescription desc;
-		desc.width = 1280;
-		desc.height = 720;
+		desc.width = -1;
+		desc.height = -1;
 		desc.color = (int32_t) 0x000000FF;
 		desc.type = PRIMARY;
 		desc.buffer = DOUBLE;
 		if(ibutterfree_create_surface(&surface, &desc) == IBUTTERFREE_OK)
 		{
+			int xres = 0;
+			int yres = 0;
+			ibutterfree_get_resolution(&surface, &xres, &yres);
 			ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
 			ibutterfree_set_color(&surface, (int32_t)0x00FF00FF);
-			int i = 1000;
+			int i = 0;
 			while(1)
 			{
-				for (i = 300; i >= 0; i -= 1)
+				for (i = xres/2; i >= 0; i -= 1)
 				{
-					ibutterfree_draw_circle(&surface, 640, 360, i);
+					ibutterfree_fill_circle(&surface, xres/2, yres/2, i);
 					ibutterfree_flip(&surface);
 					usleep(10);
 					ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);

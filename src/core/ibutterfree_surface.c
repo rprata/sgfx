@@ -22,10 +22,26 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 	surface->desc = (IButterFreeSurfaceDescription *) malloc(sizeof(IButterFreeSurfaceDescription));
 	memcpy(surface->desc, desc, sizeof(IButterFreeSurfaceDescription));
 
-	if (!surface->desc) 
+	if (!surface->desc)
 	{
 		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurfaceDescription");
 		return IBUTTERFREE_ERROR;		
+	}
+
+	if (surface->desc->width < -1 || surface->desc->height < -1)
+	{
+		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurfaceDescription");
+		return IBUTTERFREE_ERROR;		
+	}
+
+	if (surface->desc->width == -1)
+	{
+		surface->desc->width = m_bfs->vinfo.xres_virtual;
+	}
+
+	if (surface->desc->height == -1)
+	{
+		surface->desc->height = m_bfs->vinfo.yres_virtual;
 	}
 
 	surface->desc->screensize = surface->desc->width * surface->desc->height;
@@ -61,6 +77,23 @@ void ibutterfree_destroy_surface(IButterFreeSurface * surface)
 			surface->desc = NULL;
 		}
 	}
+}
+
+
+IBUTTERFREE_RET ibutterfree_get_resolution(IButterFreeSurface * surface, int * xres, int * yres)
+{
+    if (surface)
+    {
+        *xres = surface->desc->width;
+        *yres = surface->desc->height;
+        return IBUTTERFREE_OK;
+    }
+    else
+    {
+    	IBUTTERFREE_LOG_ERROR("Failed to get resolution");
+    	return IBUTTERFREE_ERROR;
+    }
+    
 }
 
 IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc)
