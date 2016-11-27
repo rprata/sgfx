@@ -12,19 +12,19 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
     	m_bfs->fbfd = open(FB, O_RDWR);
         if (m_bfs->fbfd == -1)
         {
-            IBUTTERFREE_ERROR("Cannot open framebuffer device");
+            IBUTTERFREE_LOG_ERROR("Cannot open framebuffer device");
             return IBUTTERFREE_ERROR;
         }
 
         if (ioctl(m_bfs->fbfd, FBIOGET_FSCREENINFO, &m_bfs->finfo) == -1) 
         {
-            IBUTTERFREE_ERROR("Reading fixed information");
+            IBUTTERFREE_LOG_ERROR("Reading fixed information");
             return IBUTTERFREE_ERROR;
         }
 
         if (ioctl(m_bfs->fbfd, FBIOGET_VSCREENINFO, &m_bfs->vinfo) == -1) 
         {
-            IBUTTERFREE_ERROR("Reading variable information");
+            IBUTTERFREE_LOG_ERROR("Reading variable information");
             return IBUTTERFREE_ERROR;
         }
 
@@ -35,7 +35,7 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         
         if (!m_bfs->fbp && !m_bfs->bbp) 
         {
-            IBUTTERFREE_ERROR("Failed to map framebuffer device to memory");
+            IBUTTERFREE_LOG_ERROR("Failed to map framebuffer device to memory");
             return IBUTTERFREE_ERROR;
         }
 

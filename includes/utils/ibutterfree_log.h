@@ -31,38 +31,38 @@
 #endif
 
 #if IBUTTERFREE_MSG_LEVEL >= IBUTTERFREE_MSG_LEVEL_TRACK
-#define IBUTTERFREE_TRACK(message, args...) \
+#define IBUTTERFREE_LOG_TRACK(message, args...) \
 	PRINTFUNCTION(ANSI_COLOR_CYAN LOG_FMT message ANSI_COLOR_CYAN NEWLINE, LOG_ARGS("TRACK"), ## args)
 #else 
-#define	IBUTTERFREE_TRACK(message, args...)		
+#define	IBUTTERFREE_LOG_TRACK(message, args...)		
 #endif
 
 #if IBUTTERFREE_MSG_LEVEL >= IBUTTERFREE_MSG_LEVEL_DEBUG
-#define IBUTTERFREE_DEBUG(message, args...) \
+#define IBUTTERFREE_LOG_DEBUG(message, args...) \
 	PRINTFUNCTION(ANSI_COLOR_BLUE LOG_FMT message ANSI_COLOR_BLUE NEWLINE, LOG_ARGS("DEBUG"), ## args)
 #else 
-#define IBUTTERFREE_DEBUG(message, args...)	
+#define IBUTTERFREE_LOG_DEBUG(message, args...)	
 #endif
 
 #if IBUTTERFREE_MSG_LEVEL >= IBUTTERFREE_MSG_LEVEL_ALERT
-#define IBUTTERFREE_ALERT(message, args...) \
+#define IBUTTERFREE_LOG_ALERT(message, args...) \
 	PRINTFUNCTION(ANSI_COLOR_GREEN LOG_FMT message ANSI_COLOR_GREEN NEWLINE, LOG_ARGS("ALERT"), ## args)
 #else 
-#define	IBUTTERFREE_ALERT(message, args...)	
+#define	IBUTTERFREE_LOG_ALERT(message, args...)	
 #endif
 
 #if IBUTTERFREE_MSG_LEVEL >= IBUTTERFREE_MSG_LEVEL_WARNING
-#define IBUTTERFREE_WARNING(message, args...) \
+#define IBUTTERFREE_LOG_WARNING(message, args...) \
 	PRINTFUNCTION(ANSI_COLOR_MAGENTA LOG_FMT message ANSI_COLOR_MAGENTA NEWLINE, LOG_ARGS("WARNING"), ## args)
 #else 
-#define IBUTTERFREE_WARNING(message, args...)	
+#define IBUTTERFREE_LOG_WARNING(message, args...)	
 #endif
 
 #if (IBUTTERFREE_MSG_LEVEL >= IBUTTERFREE_MSG_LEVEL_ERROR)
-#define IBUTTERFREE_ERROR(message, args...) \
+#define IBUTTERFREE_LOG_ERROR(message, args...) \
 	PRINTFUNCTION(ANSI_COLOR_RED LOG_FMT message ANSI_COLOR_RED NEWLINE, LOG_ARGS("ERROR"), ## args)
 #else 
-#define	IBUTTERFREE_ERROR(message, args...)	
+#define	IBUTTERFREE_LOG_ERROR(message, args...)	
 #endif	
 
 #endif

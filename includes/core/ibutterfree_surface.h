@@ -18,6 +18,7 @@ typedef enum IButterFreeSurfaceType {
 typedef struct IButterFreeSurfaceDescription {
 	int width;
 	int height;
+	long screensize;
 	int32_t color;
 	IButterFreeSurfaceType type;
 	IButterFreeSurfaceBuffer buffer;

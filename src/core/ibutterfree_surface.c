@@ -6,13 +6,13 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 {
 	if (!m_bfs) 
 	{
-		IBUTTERFREE_ERROR("Invalid IButterFreeStruct");
+		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeStruct");
 		return IBUTTERFREE_ERROR;
 	}
 
 	if (!surface)
 	{
-		IBUTTERFREE_ERROR("IButterFreeSurface cannot be created");
+		IBUTTERFREE_LOG_ERROR("IButterFreeSurface cannot be created");
 		return IBUTTERFREE_ERROR;		
 	}
 
@@ -24,16 +24,17 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 
 	if (!surface->desc) 
 	{
-		IBUTTERFREE_ERROR("Invalid IButterFreeSurfaceDescription");
+		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurfaceDescription");
 		return IBUTTERFREE_ERROR;		
 	}
 
-	long screenbuffersize =  sizeof(int32_t) * surface->desc->width * surface->desc->height;
+	surface->desc->screensize = surface->desc->width * surface->desc->height;
+	long screenbuffersize =  sizeof(int32_t) * surface->desc->screensize;
 
 	surface->screenbuffer = (int32_t *) malloc(screenbuffersize);
 	if (!surface->screenbuffer)
 	{
-		IBUTTERFREE_ERROR("ScreenBuffer cannot be created");
+		IBUTTERFREE_LOG_ERROR("ScreenBuffer cannot be created");
 		return IBUTTERFREE_ERROR;
 	}
 
@@ -73,7 +74,7 @@ IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface
 	}
 	else
 	{
-		IBUTTERFREE_ERROR("Error to set surface description");
+		IBUTTERFREE_LOG_ERROR("Error to set surface description");
 		return IBUTTERFREE_ERROR;				
 	}
 }
@@ -89,13 +90,13 @@ IBUTTERFREE_RET ibutterfree_surface_get_description(IButterFreeSurface * surface
 		}
 		else
 		{
-			IBUTTERFREE_ERROR("Error to get surface description [description is NULL]");
+			IBUTTERFREE_LOG_ERROR("Error to get surface description [description is NULL]");
 			return IBUTTERFREE_ERROR;
 		}
 	}
 	else
 	{
-		IBUTTERFREE_ERROR("Error to get surface description [surface is NULL]");
+		IBUTTERFREE_LOG_ERROR("Error to get surface description [surface is NULL]");
 		return IBUTTERFREE_ERROR;				
 	}
 }
@@ -108,7 +109,7 @@ IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * i
 	}
 	else
 	{
-		IBUTTERFREE_ERROR("Error to get surface id [surface is NULL]");		
+		IBUTTERFREE_LOG_ERROR("Error to get surface id [surface is NULL]");		
 	}
 	return IBUTTERFREE_OK;
 }
@@ -117,12 +118,12 @@ IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t 
 {
 	if (surface)
 	{
-		wmemset(surface->screenbuffer, color, surface->desc->width * surface->desc->height);
+		wmemset(surface->screenbuffer, color, surface->desc->screensize);
 		return IBUTTERFREE_OK;
 	}
 	else
 	{
-		IBUTTERFREE_ERROR("Failed to clear surface");
+		IBUTTERFREE_LOG_ERROR("Failed to clear surface");
 		return IBUTTERFREE_ERROR;
 	}
 }
