@@ -83,6 +83,20 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface * surface, in
 	
 }
 
+IBUTTERFREE_RET ibutterfree_draw_point(IButterFreeSurface * surface, int px, int py)
+{
+	if (surface)
+	{
+		__ibutterfree_draw_screenbuffer(surface, px, py, surface->desc->color);
+		return IBUTTERFREE_OK;
+	}
+	else
+	{
+		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_point has failed")
+		return IBUTTERFREE_ERROR;
+	}
+}
+
 inline void __draw_horizontal_line(IButterFreeSurface * surface, int x0, int x1, int y, uint32_t rgba)
 {
 	if (surface)
@@ -205,7 +219,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 	}
 	else
 	{
-		IBUTTERFREE_LOG_ERROR("Values for x and y are invalid");
+		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_line has failed");
 		return IBUTTERFREE_ERROR;
 	}
 }
