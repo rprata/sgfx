@@ -5,7 +5,6 @@
 
 int main (int argc, char ** argv)
 {
-	ibutterfree_set_msg_level(IBUTTERFREE_MSG_LEVEL_ALL);
 	if (ibutterfree_init(argc, argv) == IBUTTERFREE_OK)
 	{
 		IButterFreeSurface surface;

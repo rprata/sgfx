@@ -5,7 +5,6 @@
 
 int main (int argc, char ** argv)
 {
-	ibutterfree_set_msg_level(IBUTTERFREE_MSG_LEVEL_ALL);
 	if (ibutterfree_init(argc, argv) == IBUTTERFREE_OK)
 	{
 		IButterFreeSurface surface;
@@ -14,7 +13,7 @@ int main (int argc, char ** argv)
 		desc.height = 720;
 		desc.color = (int32_t) 0x000000FF;
 		desc.type = PRIMARY;
-		desc.buffer = SINGLE;
+		desc.buffer = DOUBLE;
 		if(ibutterfree_create_surface(&surface, &desc) == IBUTTERFREE_OK)
 		{
 			ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
@@ -26,7 +25,7 @@ int main (int argc, char ** argv)
 				{
 					ibutterfree_draw_circle(&surface, 640, 360, i);
 					ibutterfree_flip(&surface);
-					usleep(1000);
+					usleep(10);
 					ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
 				}
 			}

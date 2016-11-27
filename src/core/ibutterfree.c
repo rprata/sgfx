@@ -12,30 +12,30 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
     	m_bfs->fbfd = open(FB, O_RDWR);
         if (m_bfs->fbfd == -1)
         {
-            ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Cannot open framebuffer device");
+            IBUTTERFREE_ERROR("Cannot open framebuffer device");
             return IBUTTERFREE_ERROR;
         }
 
         if (ioctl(m_bfs->fbfd, FBIOGET_FSCREENINFO, &m_bfs->finfo) == -1) 
         {
-            ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Reading fixed information");
+            IBUTTERFREE_ERROR("Reading fixed information");
             return IBUTTERFREE_ERROR;
         }
 
         if (ioctl(m_bfs->fbfd, FBIOGET_VSCREENINFO, &m_bfs->vinfo) == -1) 
         {
-            ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Reading variable information");
+            IBUTTERFREE_ERROR("Reading variable information");
             return IBUTTERFREE_ERROR;
         }
 
-        m_bfs->screensize = m_bfs->vinfo.xres * m_bfs->vinfo.yres * m_bfs->vinfo.bits_per_pixel / 8;
+        m_bfs->screensize = m_bfs->vinfo.xres_virtual * m_bfs->vinfo.yres_virtual * (m_bfs->vinfo.bits_per_pixel / 8);
 
         m_bfs->fbp = (char *) mmap(0, m_bfs->screensize, PROT_READ | PROT_WRITE, MAP_SHARED, m_bfs->fbfd, (off_t) 0);
   		m_bfs->bbp = (char *) mmap(0, m_bfs->screensize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, (off_t)0);
         
         if (!m_bfs->fbp && !m_bfs->bbp) 
         {
-            ibutterfree_log(IBUTTERFREE_MSG_LEVEL_ERROR, "Failed to map framebuffer device to memory");
+            IBUTTERFREE_ERROR("Failed to map framebuffer device to memory");
             return IBUTTERFREE_ERROR;
         }
 

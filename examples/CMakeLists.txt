@@ -4,6 +4,8 @@ add_executable (drawline drawline.c)
 add_executable (drawcircle drawcircle.c)
 add_executable (animationcircle animationcircle.c)
 
+add_definitions(-DIBUTTERFREE_MSG_LEVEL=IBUTTERFREE_MSG_LEVEL_ALL)
+
 target_link_libraries (helloworld LINK_PUBLIC ibutterfree)
 target_link_libraries (doublebuffer LINK_PUBLIC ibutterfree)
 target_link_libraries (drawline LINK_PUBLIC ibutterfree)
