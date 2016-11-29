@@ -27,12 +27,14 @@ int main (int argc, char ** argv)
 			ibutterfree_set_color(&surface, (int32_t)0x00FF00FF);
 			ibutterfree_draw_line(&surface, 0, 384, 1366, 384);
 			ibutterfree_set_color(&surface, (int32_t)0x0000FFFF);
-
 			ibutterfree_fill_rect(&surface, 200, 200, 500, 200);
+			ibutterfree_set_color(&surface, (int32_t)0x0000FFAF);
+
 			ibutterfree_draw_rect(&surface, 100, 100, 700, 400);
 
 			ibutterfree_set_color(&surface, (int32_t)0x00AAFFFF);
 			ibutterfree_draw_circle(&surface, 700, 500, 200);
+			ibutterfree_set_color(&surface, (int32_t)0xFF000037);
 			ibutterfree_fill_circle(&surface, 700, 500, 100);
 
 			ibutterfree_flip(&surface);

@@ -7,6 +7,22 @@ IBUTTERFREE_RET __ibutterfree_swap_buffers(void)
 	return IBUTTERFREE_OK;
 }
 
+unsigned int __blendPreMulAlpha(unsigned int colora, unsigned int colorb, unsigned int alpha)
+{
+    unsigned int rb = (colora & 0xFF00FF) + (alpha * ((colorb & 0xFF00FF)) >> 8);
+    unsigned int g = (colora & 0x00FF00) + (alpha * ((colorb & 0x00FF00)) >> 8);
+    return (rb & 0xFF00FF) + (g & 0x00FF00);
+}
+
+unsigned int __blendAlpha(unsigned int colora, unsigned int colorb, unsigned int alpha)
+{
+    unsigned int rb1 = ((0x100 - alpha) * (colora & 0xFF00FF)) >> 8;
+    unsigned int rb2 = (alpha * (colorb & 0xFF00FF)) >> 8;
+    unsigned int g1  = ((0x100 - alpha) * (colora & 0x00FF00)) >> 8;
+    unsigned int g2  = (alpha * (colorb & 0x00FF00)) >> 8;
+    return ((rb1 | rb2) & 0xFF00FF) + ((g1 | g2) & 0x00FF00);
+}
+
 IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface * surface, int px, int py, int32_t rgba)
 {
 	if (m_bfs)
@@ -27,17 +43,16 @@ IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface * surface, int px, i
 
 		if (location < m_bfs->screensize && location >= 0)
 		{
-			
 			if (vinfo.bits_per_pixel == 32)
 			{
-	            *(bp + location) = (rgba & 0xFF000000) >> 24;       // blue
-	            *(bp + location + 1) = (rgba & 0x00FF0000) >> 16;   // green
-	            *(bp + location + 2) = (rgba & 0x0000FF00) >> 8;    // red
+				*(bp + location) = (rgba & 0xFF000000) >> 24;    	 // red
+	            *(bp + location + 1) = (rgba & 0x00FF0000) >> 16;    // green
+	            *(bp + location + 2) = (rgba & 0x0000FF00) >> 8;	 // blue
 	            *(bp + location + 3) = (rgba & 0x000000FF);      	 // transparency
 	        } 
 	        else //assume 16bpp
 	        { 
-	            int b = (rgba & 0xFF000000) >> 24;  				 //blue
+	            int b = (rgba & 0xFF000000) >> 24;  				 // blue
 	            int g = (rgba & 0x00FF0000) >> 16; 					 // green
 	            int r = (rgba & 0x0000FF00) >> 8; 					 // red
 	            unsigned short int t = r << 11 | g << 5 | b;
@@ -63,10 +78,30 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface * surface, in
 
 	if (surface) 
 	{
+		rgba = (((rgba & 0x0000FF00) >> 8) << 24) +
+			   (((rgba & 0x00FF0000) >> 16) << 16) +
+			   (((rgba & 0xFF000000) >> 24) << 8) +
+			   (((rgba & 0x000000FF)));
+
 		long position = px + py * surface->desc->width;
 		if (position < surface->desc->screensize && position >= 0)
 		{
-			surface->screenbuffer[position] = rgba;
+			unsigned char alpha = rgba & 0x000000FF;
+			uint32_t backpixel = surface->screenbuffer[position];
+			if (alpha <= 0)
+			{
+				return IBUTTERFREE_OK;
+			}
+
+			uint32_t rgba_f = rgba;
+
+			if (alpha < 0xFF)
+			{
+				alpha = 0x00000FF - alpha;
+				rgba_f = (__blendAlpha((unsigned int)((rgba & 0xFFFFFF00) >> 8), (unsigned int)((backpixel & 0xFFFFFF00) >> 8), alpha) << 8) + alpha;
+			}
+
+			surface->screenbuffer[position] = rgba_f;
 			return IBUTTERFREE_OK;
 		}
 		else
