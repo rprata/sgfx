@@ -445,9 +445,12 @@ IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface)
 	{
 		int i = 0;
 		
-		for (i = 0; i < surface->desc->screensize; i += 1)
+		if (surface->desc->type == PRIMARY)
 		{
-			__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
+			for (i = 0; i < surface->desc->screensize; i += 1)
+			{
+				__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
+			}
 		}
 
 		if (surface->desc->buffer == DOUBLE)
