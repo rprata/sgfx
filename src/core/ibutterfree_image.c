@@ -1,5 +1,74 @@
 #include "ibutterfree_image.h"
 
+unsigned char * __loadPPMImage(const char *filename, int * w, int * h)
+{
+	int width, height, num, size;
+
+	FILE  *fp = fopen(filename, "r");
+
+	if (!fp)
+	{
+		return NULL;
+	}
+
+	/* reading ppm header */
+	char ch;
+	int  maxval;
+
+	if (fscanf(fp, "P%c\n", &ch) != 1 || ch != '6') 
+	{
+		return NULL;
+	}
+
+	ch = getc(fp);
+	while (ch == '#')
+	{
+		do {
+			ch = getc(fp);
+	  	} while (ch != '\n');
+	  	ch = getc(fp);
+	}
+
+	if (!isdigit(ch))
+	{
+		return NULL;
+	}
+
+	ungetc(ch, fp);
+
+	if(fscanf(fp, "%d%d%d\n", &width, &height, &maxval) < 0)
+	{
+		return NULL;
+	}
+
+	if (maxval != 255) 
+	{
+		return NULL;
+	}
+	/* end reading ppm reader */
+
+	*w = width;
+	*h =height;
+	size = width * height * 3;
+
+	unsigned char * data   = (unsigned char *) malloc(size);
+
+	if (!data)
+	{
+		return NULL;
+	}
+
+	num = fread((void *) data, 1, (size_t) size, fp);
+
+	if (num != size)
+	{
+		return NULL;
+	}
+
+	fclose(fp);
+
+	return data;
+}
 
 unsigned char * __loadBitmapFile(const char *filename, BITMAPINFOHEADER *bitmapInfoHeader)
 {
@@ -77,6 +146,40 @@ unsigned char * __loadBitmapFile(const char *filename, BITMAPINFOHEADER *bitmapI
     return bitmapImage;
 }
 
+void __flip_vertically(unsigned char *pixels, const size_t width, const size_t height, const size_t bytes_per_pixel)
+{
+    const size_t stride = width * bytes_per_pixel;
+    unsigned char *row = malloc(stride);
+    unsigned char *low = pixels;
+    unsigned char *high = &pixels[(height - 1) * stride];
+
+    for (; low < high; low += stride, high -= stride) {
+        memcpy(row, low, stride);
+        memcpy(low, high, stride);
+        memcpy(high, row, stride);
+    }
+    free(row);
+}
+
+void __flip_horizontally(unsigned char *pixels, const size_t width, const size_t height, const size_t bytes_per_pixel)
+{
+	int i = 0;
+	int j = 0;
+	for (i = 0; i < height * bytes_per_pixel; i += bytes_per_pixel)
+	{
+		for (j = 0; j < width * bytes_per_pixel / 2; j += bytes_per_pixel)
+		{
+			for (int k = 0; k < bytes_per_pixel; k++)
+			{
+				int location = i*width + j + k;
+				int newlocation = i*width + width*bytes_per_pixel - j + k;
+				unsigned char temp = pixels[location];
+				pixels[location] = pixels[newlocation];
+				pixels[newlocation] = temp;
+			}
+		}
+	}
+}
 
 IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char * filename, int x, int y, int width, int height, IButterFreeImageType type)
 {
@@ -94,6 +197,8 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			int i, j;
 			int bitcount = bitmapInfoHeader.biBitCount / 8;
 
+			__flip_horizontally(bitmapData, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, bitcount);
+
 			for (i = 0; i <= bitcount * bitmapInfoHeader.biHeight; i += bitcount)
 			{
 				for (j = 0; j <= bitcount * bitmapInfoHeader.biWidth; j += bitcount)
@@ -108,6 +213,31 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 					ibutterfree_draw_point(surface, x + abs(j / bitcount - bitmapInfoHeader.biWidth), y + abs(i / bitcount - bitmapInfoHeader.biHeight));
 				}
 			}
+		}
+		else if (type == IBUTTERFREE_IMAGE_TYPE_PPM)
+		{
+			int w = 0; 
+			int h = 0;
+			unsigned char * ppmData = __loadPPMImage(filename, &w, &h);
+			
+			int i, j;
+
+			for (i = 0; i <= 3 * h; i += 3)
+			{
+				for (j = 0; j <= 3 * w; j += 3)
+				{
+					long absPosition = j + w * i;
+					int32_t color = ((ppmData[absPosition] << 24) & 0xFF000000) +
+									((ppmData[absPosition + 1] << 16) & 0x00FF0000) +
+									((ppmData[absPosition + 2] << 8) & 0x0000FF00) +
+									0x000000FF;
+
+					ibutterfree_set_color(surface, color);
+					ibutterfree_draw_point(surface, x + j / 3, y + i / 3);
+				}
+			}
+
+
 		}
 		return IBUTTERFREE_OK;
 	}

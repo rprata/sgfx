@@ -1,10 +1,9 @@
 #include "ibutterfree_draw.h"
 #include "ibutterfree_definitions.h"
 
-IBUTTERFREE_RET __ibutterfree_swap_buffers(void)
+inline void __ibutterfree_swap_buffers(void)
 {
 	memcpy(m_bfs->fbp, m_bfs->bbp, m_bfs->screensize);
-	return IBUTTERFREE_OK;
 }
 
 unsigned int __blendPreMulAlpha(unsigned int colora, unsigned int colorb, unsigned int alpha)
