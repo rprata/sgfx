@@ -1,4 +1,5 @@
 add_library (ibutterfree SHARED
+		utils/ibutterfree_upng.c
 		core/ibutterfree.c
 		core/ibutterfree_surface.c
 		core/ibutterfree_draw.c

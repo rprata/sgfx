@@ -191,26 +191,26 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			unsigned char * bitmapData = __loadBitmapFile(filename, &bitmapInfoHeader);
 			if (bitmapData == NULL)
 			{
-				IBUTTERFREE_LOG_ERROR("Error to create  bmp image.");
+				IBUTTERFREE_LOG_ERROR("Error to create bmp image.");
 				return IBUTTERFREE_ERROR;
 			}
 			int i, j;
-			int bitcount = bitmapInfoHeader.biBitCount / 8;
+			int bpp = bitmapInfoHeader.biBitCount / 8;
 
-			__flip_horizontally(bitmapData, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, bitcount);
+			__flip_horizontally(bitmapData, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, bpp);
 
-			for (i = 0; i <= bitcount * bitmapInfoHeader.biHeight; i += bitcount)
+			for (i = 0; i <= bpp * bitmapInfoHeader.biHeight; i += bpp)
 			{
-				for (j = 0; j <= bitcount * bitmapInfoHeader.biWidth; j += bitcount)
+				for (j = 0; j <= bpp * bitmapInfoHeader.biWidth; j += bpp)
 				{
 					long absPosition = j + bitmapInfoHeader.biWidth * i;
 					int32_t color = ((bitmapData[absPosition] << 24) & 0xFF000000) +
 									((bitmapData[absPosition + 1] << 16) & 0x00FF0000) +
 									((bitmapData[absPosition + 2] << 8) & 0x0000FF00) +
-									((bitcount == 4) ? ((bitmapData[absPosition + 4]) & 0x000000FF) : 0x000000FF);
+									((bpp == 4) ? ((bitmapData[absPosition + 4]) & 0x000000FF) : 0x000000FF);
 
 					ibutterfree_set_color(surface, color);
-					ibutterfree_draw_point(surface, x + abs(j / bitcount - bitmapInfoHeader.biWidth), y + abs(i / bitcount - bitmapInfoHeader.biHeight));
+					ibutterfree_draw_point(surface, x + abs(j / bpp - bitmapInfoHeader.biWidth), y + abs(i / bpp - bitmapInfoHeader.biHeight));
 				}
 			}
 		}
@@ -220,6 +220,12 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			int h = 0;
 			unsigned char * ppmData = __loadPPMImage(filename, &w, &h);
 			
+			if (ppmData == NULL)
+			{
+				IBUTTERFREE_LOG_ERROR("Error to create ppm image.");
+				return IBUTTERFREE_ERROR;
+			}
+
 			int i, j;
 
 			for (i = 0; i <= 3 * h; i += 3)
@@ -234,6 +240,37 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 
 					ibutterfree_set_color(surface, color);
 					ibutterfree_draw_point(surface, x + j / 3, y + i / 3);
+				}
+			}
+		}
+		else if(type == IBUTTERFREE_IMAGE_TYPE_PNG)
+		{
+			ibutterfree_upng_t * ibutterfree_upng = ibutterfree_upng_new_from_file(filename);
+			ibutterfree_upng_decode(ibutterfree_upng);
+			if (ibutterfree_upng_get_error(ibutterfree_upng) != UPNG_EOK) {
+				IBUTTERFREE_LOG_ERROR("Error to create png image.");
+				return IBUTTERFREE_ERROR;
+			}
+			
+			const unsigned char * pngData = ibutterfree_upng_get_buffer(ibutterfree_upng);
+			unsigned w = ibutterfree_upng_get_width(ibutterfree_upng);
+			unsigned h = ibutterfree_upng_get_height(ibutterfree_upng);
+			unsigned bpp = ibutterfree_upng_get_bpp(ibutterfree_upng) / 8;
+
+			int i, j;
+
+			for (i = 0; i < bpp * h; i += bpp)
+			{
+				for (j = 0; j < bpp * w; j += bpp)
+				{
+					long absPosition = j + w * i;
+					int32_t color = ((pngData[absPosition] << 24) & 0xFF000000) +
+									((pngData[absPosition + 1] << 16) & 0x00FF0000) +
+									((pngData[absPosition + 2] << 8) & 0x0000FF00) +
+									((bpp == 4) ? ((pngData[absPosition + 3]) & 0x000000FF) : 0x000000FF);
+
+					ibutterfree_set_color(surface, color);
+					ibutterfree_draw_point(surface, x + j / bpp, y + i / bpp);
 				}
 			}
 
