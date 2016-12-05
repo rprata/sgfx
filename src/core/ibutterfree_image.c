@@ -251,7 +251,7 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 				IBUTTERFREE_LOG_ERROR("Error to create png image.");
 				return IBUTTERFREE_ERROR;
 			}
-			
+
 			const unsigned char * pngData = ibutterfree_upng_get_buffer(ibutterfree_upng);
 			unsigned w = ibutterfree_upng_get_width(ibutterfree_upng);
 			unsigned h = ibutterfree_upng_get_height(ibutterfree_upng);
@@ -273,9 +273,12 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 					ibutterfree_draw_point(surface, x + j / bpp, y + i / bpp);
 				}
 			}
-
-
 		}
+		else if(type == IBUTTERFREE_IMAGE_TYPE_JPEG)
+		{
+			return IBUTTERFREE_NOT_IMPLEMENTED;
+		}
+
 		return IBUTTERFREE_OK;
 	}
 	else
