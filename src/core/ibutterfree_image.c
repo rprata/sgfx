@@ -165,11 +165,12 @@ void __flip_horizontally(unsigned char *pixels, const size_t width, const size_t
 {
 	int i = 0;
 	int j = 0;
+	int k = 0;
 	for (i = 0; i < height * bytes_per_pixel; i += bytes_per_pixel)
 	{
 		for (j = 0; j < width * bytes_per_pixel / 2; j += bytes_per_pixel)
 		{
-			for (int k = 0; k < bytes_per_pixel; k++)
+			for (k = 0; k < bytes_per_pixel; k++)
 			{
 				int location = i*width + j + k;
 				int newlocation = i*width + width*bytes_per_pixel - j + k;
