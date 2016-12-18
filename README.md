@@ -25,7 +25,7 @@ In case of cross compilation:
 ```sh
 $ cd ibutterfree
 $ mkdir build
-$ cmake CMakeLists.txt -Bbuild DCMAKE_TOOLCHAIN_FILE=toolchains/<toolchain_file>.cmake
+$ cmake CMakeLists.txt -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains/<toolchain_file>.cmake
 $ cd build
 $ make
 ```
