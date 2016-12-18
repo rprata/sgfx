@@ -3,7 +3,6 @@
 
 #include "ibutterfree.h"
 #include <stdint.h>
-#include <wchar.h>
 
 typedef enum IButterFreeSurfaceBuffer {
 	SINGLE, 

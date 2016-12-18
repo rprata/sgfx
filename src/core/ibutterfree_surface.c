@@ -151,7 +151,11 @@ IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t 
 {
 	if (surface)
 	{
-		wmemset(surface->screenbuffer, color, surface->desc->screensize);
+		uint32_t i;
+		for(i = 0; i < surface->desc->screensize; i++)
+		{
+			(surface->screenbuffer)[i] = color;
+		}
 		return IBUTTERFREE_OK;
 	}
 	else
