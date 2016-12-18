@@ -13,7 +13,7 @@ IButterFree is a set of graphics APIs implemented on top of the Linux Frame Buff
 * No library dependencies, except for libc;
 
 ## Installation
-IButterFree requires [CMake](https://cmake.org/) to compile.
+IButterFree requires [CMake](https://cmake.org/) to compile. Follow the instructions:
 ```sh
 $ cd ibutterfree
 $ mkdir build
