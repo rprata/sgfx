@@ -7,10 +7,11 @@ SET(TOOLCHAIN_SYSROOT ${TOOLCHAIN_ROOT}/arm-linux-gnueabihf/sysroot)
 # specify the cross compiler
 SET(CMAKE_C_COMPILER   ${TOOLCHAIN_ROOT}/bin/arm-linux-gnueabihf-gcc)
 SET(CMAKE_CXX_COMPILER ${TOOLCHAIN_ROOT}/bin/arm-linux-gnueabihf-g++)
+SET(CMAKE_STRIP		   ${TOOLCHAIN_ROOT}/bin/arm-linux-gnueabihf-strip CACHE STRING "" FORCE)
+SET(CMAKE_AR   	       ${TOOLCHAIN_ROOT}/bin/arm-linux-gnueabihf-ar CACHE STRING "" FORCE)
 
 SET(CMAKE_SYSROOT ${TOOLCHAIN_SYSROOT})
 SET(CMAKE_FIND_ROOT_PATH ${TOOLCHAIN_SYSROOT})
-
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
