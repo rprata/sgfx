@@ -182,6 +182,51 @@ void __flip_horizontally(unsigned char *pixels, const size_t width, const size_t
 	}
 }
 
+int32_t * __resize_bilinear(int32_t * input, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight)
+{
+	int32_t * temp = (int32_t *) malloc(targetWidth * targetHeight * sizeof(int32_t));
+	int a, b, c, d, x, y, index, i, j;
+    float x_ratio = ((float)(sourceWidth - 1)) / targetWidth;
+    float y_ratio = ((float)(sourceHeight - 1)) / targetHeight;
+    float x_diff, y_diff, blue, red, green ;
+    int offset = 0 ;
+
+    for (i = 0; i < targetHeight; i++) 
+    {
+        for (j = 0; j < targetWidth; j++) 
+        {
+            x = (int)(x_ratio * j) ;
+            y = (int)(y_ratio * i) ;
+            x_diff = (x_ratio * j) - x ;
+            y_diff = (y_ratio * i) - y ;
+            index = (y * sourceWidth + x) ;                
+            a = input[index] ;
+            b = input[index + 1] ;
+            c = input[index + sourceWidth] ;
+            d = input[index + sourceWidth + 1] ;
+
+            // blue element
+            blue = ((a >> 8) & 0xff) * (1 - x_diff) * (1 - y_diff) + ((b >> 8) & 0xff) * (x_diff) * (1 - y_diff) +
+                   ((c >> 8) & 0xff) * (y_diff) * (1 - x_diff)   + ((d >> 8) & 0xff) * (x_diff * y_diff);
+
+            // green element
+            green = ((a >> 16) & 0xff) * (1 - x_diff) * (1 - y_diff) + ((b >> 16) & 0xff) * (x_diff) * (1 - y_diff) +
+                    ((c >> 16) & 0xff) * (y_diff) * (1 - x_diff)   + ((d >> 16) & 0xff) * (x_diff * y_diff);
+
+            // red element
+            red = ((a >> 24) & 0xff) * (1-x_diff) * (1 - y_diff) + ((b >> 24) & 0xff) * (x_diff) * (1 - y_diff) +
+                  ((c >> 24) & 0xff) * (y_diff) * (1 - x_diff)   + ((d >> 24) & 0xff) * (x_diff * y_diff);
+
+            temp [offset++] = 
+                    (int32_t) (0x000000ff + // alpha
+                    ((((unsigned char)red)   << 24)&0xff000000) +
+                    ((((unsigned char)green) << 16)&0x00ff0000) +
+                    ((((unsigned char)blue)  << 8)&0x0000ff00));
+        }
+    }
+    return temp;
+}
+
 IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char * filename, int x, int y, int width, int height, IButterFreeImageType type)
 {
 	if (surface)
@@ -198,25 +243,60 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			int i, j;
 			int bpp = bitmapInfoHeader.biBitCount / 8;
 
-			__flip_horizontally(bitmapData, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, bpp);
-
-			for (i = 0; i <= bpp * bitmapInfoHeader.biHeight; i += bpp)
+			if ((width != bitmapInfoHeader.biWidth && width != -1) || (height != bitmapInfoHeader.biHeight && height != -1))
 			{
-				for (j = 0; j <= bpp * bitmapInfoHeader.biWidth; j += bpp)
+				__flip_vertically(bitmapData, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, bpp);
+				int32_t * original_image = (int32_t *) malloc(bitmapInfoHeader.biWidth * bitmapInfoHeader.biHeight * sizeof(int32_t));
+				for (i = 0; i < bpp * bitmapInfoHeader.biHeight; i += bpp)
 				{
-					long absPosition = j + bitmapInfoHeader.biWidth * i;
-					int32_t color = ((bitmapData[absPosition] << 24) & 0xFF000000) +
-									((bitmapData[absPosition + 1] << 16) & 0x00FF0000) +
-									((bitmapData[absPosition + 2] << 8) & 0x0000FF00) +
-									((bpp == 4) ? ((bitmapData[absPosition + 4]) & 0x000000FF) : 0x000000FF);
+					for (j = 0; j < bpp * bitmapInfoHeader.biWidth; j += bpp)
+					{
+						long absPosition = j + bitmapInfoHeader.biWidth * i;
+						int32_t color = ((bitmapData[absPosition] << 24) & 0xFF000000) |
+										((bitmapData[absPosition + 1] << 16) & 0x00FF0000) |
+										((bitmapData[absPosition + 2] << 8) & 0x0000FF00) |
+										((bpp == 4) ? ((bitmapData[absPosition + 3]) & 0x000000FF) : 0x000000FF);										
 
-					ibutterfree_set_color(surface, color);
-					ibutterfree_draw_point(surface, x + abs(j / bpp - bitmapInfoHeader.biWidth), y + abs(i / bpp - bitmapInfoHeader.biHeight));
+						if (absPosition / bpp < bitmapInfoHeader.biWidth * bitmapInfoHeader.biHeight)
+							original_image[absPosition / bpp] = color;
+					}
+				}
+				
+				int32_t * resized_image = __resize_bilinear(original_image, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, width, height);
+
+				for (i = 0; i < height; i += 1)
+				{
+					for (j = 0; j < width; j += 1)
+					{
+						long absPosition = j + width * i;
+						ibutterfree_set_color(surface, resized_image[absPosition]);
+						ibutterfree_draw_point(surface, x + j, y + i);
+					}
 				}
 			}
+			else
+			{
+				__flip_horizontally(bitmapData, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, bpp);
+				for (i = 0; i < bpp * bitmapInfoHeader.biHeight; i += bpp)
+				{
+					for (j = 0; j < bpp * bitmapInfoHeader.biWidth; j += bpp)
+					{
+						long absPosition = j + bitmapInfoHeader.biWidth * i;
+						int32_t color = ((bitmapData[absPosition] << 24) & 0xFF000000) +
+										((bitmapData[absPosition + 1] << 16) & 0x00FF0000) +
+										((bitmapData[absPosition + 2] << 8) & 0x0000FF00) +
+										((bpp == 4) ? ((bitmapData[absPosition + 3]) & 0x000000FF) : 0x000000FF);
+
+						ibutterfree_set_color(surface, color);
+						ibutterfree_draw_point(surface, x + abs(j / bpp - bitmapInfoHeader.biWidth), y + abs(i / bpp - bitmapInfoHeader.biHeight));
+					}
+				}
+			}
+
 		}
 		else if (type == IBUTTERFREE_IMAGE_TYPE_PPM)
 		{
+			int i, j;
 			int w = 0; 
 			int h = 0;
 			unsigned char * ppmData = __loadPPMImage(filename, &w, &h);
@@ -227,20 +307,53 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 				return IBUTTERFREE_ERROR;
 			}
 
-			int i, j;
-
-			for (i = 0; i <= 3 * h; i += 3)
+			if ((width != w && width != -1) || (height != h && height != -1))
 			{
-				for (j = 0; j <= 3 * w; j += 3)
+				int32_t * original_image = (int32_t *) malloc(h * w * sizeof(int32_t));
+				for (i = 0; i < 3 * h; i += 3)
 				{
-					long absPosition = j + w * i;
-					int32_t color = ((ppmData[absPosition] << 24) & 0xFF000000) +
-									((ppmData[absPosition + 1] << 16) & 0x00FF0000) +
-									((ppmData[absPosition + 2] << 8) & 0x0000FF00) +
-									0x000000FF;
+					for (j = 0; j < 3 * w; j += 3)
+					{
+						long absPosition = j + w * i;
+						int32_t color = ((ppmData[absPosition] << 24) & 0xFF000000) +
+										((ppmData[absPosition + 1] << 16) & 0x00FF0000) +
+										((ppmData[absPosition + 2] << 8) & 0x0000FF00) +
+										0x000000FF;
 
-					ibutterfree_set_color(surface, color);
-					ibutterfree_draw_point(surface, x + j / 3, y + i / 3);
+						if (absPosition / 3 < w * h)
+							original_image[absPosition / 3] = color;
+
+					}
+				}
+				
+				int32_t * resized_image = __resize_bilinear(original_image, w, h, width, height);
+
+				for (i = 0; i < height; i += 1)
+				{
+					for (j = 0; j < width; j += 1)
+					{
+						long absPosition = j + width * i;
+						ibutterfree_set_color(surface, resized_image[absPosition]);
+						ibutterfree_draw_point(surface, x + j, y + i);
+					}
+				}
+
+			}
+			else
+			{
+				for (i = 0; i < 3 * h; i += 3)
+				{
+					for (j = 0; j < 3 * w; j += 3)
+					{
+						long absPosition = j + w * i;
+						int32_t color = ((ppmData[absPosition] << 24) & 0xFF000000) +
+										((ppmData[absPosition + 1] << 16) & 0x00FF0000) +
+										((ppmData[absPosition + 2] << 8) & 0x0000FF00) +
+										0x000000FF;
+
+						ibutterfree_set_color(surface, color);
+						ibutterfree_draw_point(surface, x + j / 3, y + i / 3);
+					}
 				}
 			}
 		}
@@ -260,18 +373,54 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 
 			int i, j;
 
-			for (i = 0; i < bpp * h; i += bpp)
+			if ((width != w && width != -1) || (height != h && height != -1))
 			{
-				for (j = 0; j < bpp * w; j += bpp)
-				{
-					long absPosition = j + w * i;
-					int32_t color = ((pngData[absPosition] << 24) & 0xFF000000) +
-									((pngData[absPosition + 1] << 16) & 0x00FF0000) +
-									((pngData[absPosition + 2] << 8) & 0x0000FF00) +
-									((bpp == 4) ? ((pngData[absPosition + 3]) & 0x000000FF) : 0x000000FF);
+				int32_t * original_image = (int32_t *) malloc(h * w * sizeof(int32_t));
 
-					ibutterfree_set_color(surface, color);
-					ibutterfree_draw_point(surface, x + j / bpp, y + i / bpp);
+				for (i = 0; i < bpp * h; i += bpp)
+				{
+					for (j = 0; j < bpp * w; j += bpp)
+					{
+						long absPosition = j + w * i;
+						int32_t color = ((pngData[absPosition] << 24) & 0xFF000000) +
+										((pngData[absPosition + 1] << 16) & 0x00FF0000) +
+										((pngData[absPosition + 2] << 8) & 0x0000FF00) +
+										((bpp == 4) ? ((pngData[absPosition + 3]) & 0x000000FF) : 0x000000FF);
+
+
+						if (absPosition / bpp < w * h)
+							original_image[absPosition / bpp] = color;
+					}
+				}
+				
+				int32_t * resized_image =  __resize_bilinear(original_image, w, h, width, height);
+
+				for (i = 0; i < height; i += 1)
+				{
+					for (j = 0; j < width; j += 1)
+					{
+						long absPosition = j + width * i;
+						ibutterfree_set_color(surface, resized_image[absPosition]);
+						ibutterfree_draw_point(surface, x + j, y + i);
+					}
+				}
+
+			}
+			else
+			{
+				for (i = 0; i < bpp * h; i += bpp)
+				{
+					for (j = 0; j < bpp * w; j += bpp)
+					{
+						long absPosition = j + w * i;
+						int32_t color = ((pngData[absPosition] << 24) & 0xFF000000) +
+										((pngData[absPosition + 1] << 16) & 0x00FF0000) +
+										((pngData[absPosition + 2] << 8) & 0x0000FF00) +
+										((bpp == 4) ? ((pngData[absPosition + 3]) & 0x000000FF) : 0x000000FF);
+
+						ibutterfree_set_color(surface, color);
+						ibutterfree_draw_point(surface, x + j / bpp, y + i / bpp);
+					}
 				}
 			}
 		}

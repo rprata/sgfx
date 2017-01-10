@@ -18,9 +18,9 @@ int main (int argc, char ** argv)
 		if(ibutterfree_create_surface(&surface, &desc) == IBUTTERFREE_OK)
 		{
 			ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
-			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.bmp", 200, 200, -1, -1, IBUTTERFREE_IMAGE_TYPE_BMP);
-			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.ppm", 400, 400, -1, -1, IBUTTERFREE_IMAGE_TYPE_PPM);
-			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.png", 200, 400, -1, -1, IBUTTERFREE_IMAGE_TYPE_PNG);
+			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.bmp", 200, 200, 50, 50, IBUTTERFREE_IMAGE_TYPE_BMP);
+			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.ppm", 400, 400, 150, 200, IBUTTERFREE_IMAGE_TYPE_PPM);
+			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.png", 200, 400, 200, 150, IBUTTERFREE_IMAGE_TYPE_PNG);
 			ibutterfree_flip(&surface);
 			ibutterfree_destroy_surface(&surface);
 		}		
