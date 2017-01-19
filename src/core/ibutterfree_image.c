@@ -264,6 +264,9 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 				
 				int32_t * resized_image = __resize_bilinear(original_image, bitmapInfoHeader.biWidth, bitmapInfoHeader.biHeight, width, height);
 
+				free(original_image);
+				original_image = NULL;
+
 				for (i = 0; i < height; i += 1)
 				{
 					for (j = 0; j < width; j += 1)
@@ -327,6 +330,9 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 				}
 				
 				int32_t * resized_image = __resize_bilinear(original_image, w, h, width, height);
+
+				free(original_image);
+				original_image = NULL;
 
 				for (i = 0; i < height; i += 1)
 				{
@@ -395,6 +401,9 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 				
 				int32_t * resized_image =  __resize_bilinear(original_image, w, h, width, height);
 
+				free(original_image);
+				original_image = NULL;
+				
 				for (i = 0; i < height; i += 1)
 				{
 					for (j = 0; j < width; j += 1)
