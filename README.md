@@ -29,3 +29,6 @@ $ cmake CMakeLists.txt -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains/<toolchain_file
 $ cd build
 $ make
 ```
+
+## License
+IButterFree is licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later. However, IButterFree incorporates several optional parts and optimizations that are covered by the GNU General Public License (GPL) version 3. If those parts get used the GPL applies to all of IButterFree.
