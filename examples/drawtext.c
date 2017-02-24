@@ -21,6 +21,9 @@ int main (int argc, char ** argv)
 		{
 			ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
 			ibutterfree_draw_text(&surface, "Hello World", 200, 200, 20, 20,  0xFF0000FF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", 200, 280, 40, 40,  0x00FF00FF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", 200, 360, 60, 60,  0x0000FFFF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", 200, 480, 80, 80,  0xFFFFFFFF, 0x000000FF);
 			ibutterfree_flip(&surface);
 			ibutterfree_destroy_surface(&surface);
 		}		
