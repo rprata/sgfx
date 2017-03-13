@@ -1,3 +1,37 @@
+/****************************************************************************
+ * Copyright (C) 2016 by Renan Prata                                        *
+ *                                                                          *
+ * This file is part of IButterFree.                                        *
+ *                                                                          *
+ *   IButterFree is free library: you can redistribute it and/or modify it  *
+ *   under the terms of the GNU Lesser General Public License as published  *
+ *   by the Free Software Foundation, either version 3 of the License, or   *
+ *   (at your option) any later version.                                    *
+ *                                                                          *
+ *   IButterFree is distributed in the hope that it will be useful,         *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *   GNU Lesser General Public License for more details.                    *
+ *                                                                          *
+ *   You should have received a copy of the GNU Lesser General Public       *
+ *   License along with IButterFree.                                        *
+ *   If not, see <http://www.gnu.org/licenses/>.                            *
+ ****************************************************************************/
+
+/**
+ * @file ibutterfree.h
+ * @author Renan Prata
+ * @date 24 Nov 2016
+ * @brief File containing main functions of IButterFree Library main structures used by library implementation. 
+ *
+ * File containing initialization functions of library and 
+ * main structures used by library implementation. 
+ * IButterFree has different implemantions for different 
+ * architectures. Before initializing the library, make 
+ * sure that the architecture configuration is correct 
+ * in CMakeLists.txt file.
+ */
+
 #ifndef __IBUTTERFREE_H__
 #define __IBUTTERFREE_H__
 
@@ -15,24 +49,46 @@
 
 #define FB "/dev/fb0"
 
-typedef enum IBUTTERFREE_RET {
-	IBUTTERFREE_ERROR,
-	IBUTTERFREE_OK,
-	IBUTTERFREE_NOT_IMPLEMENTED,
+/**
+ * @brief The kind of value that is returned by IButterFree library.
+ */
+typedef enum {
+	IBUTTERFREE_ERROR, /**< Error. */
+	IBUTTERFREE_OK, /**< Success. */
+	IBUTTERFREE_NOT_IMPLEMENTED, /**< In case of not implemented yet. */
 } IBUTTERFREE_RET;
 
-typedef struct IButterFreeStruct {
-	int fbfd;
+/**
+ * @brief Structure relative of screen characteristics.
+ */
+typedef struct {
+	int fbfd; /**< Handler of IButterFreeStruct. */
 	struct fb_var_screeninfo vinfo;
 	struct fb_fix_screeninfo finfo;
-	long int screensize;
-	char *fbp;
-	char *bbp;
+	long int screensize; /**< Screen Size. */
+	char *fbp; /**< Front-Buffer. */
+	char *bbp; /**< Back-Buffer. */
 } IButterFreeStruct;
 
 IButterFreeStruct * m_bfs;
 
+/**
+ * @brief Initializes IButterFree Graphic Module.
+ *
+ * @param argc Non-negative value representing the number of arguments passed to the program from the 
+ * environment in which the library is run. 
+ * @param argv  Pointer to the first element of an array of pointers to null-terminated multibyte 
+ * strings that represent the arguments passed to the program from the execution environment.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
+ * IBUTTERFREE_ERROR.
+ */
 IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv);
+
+/**
+ * @brief Finishes IButterFree Graphic Module.
+ *
+ * It's necessary to finalize your application and free memory allocated.
+ */
 void ibutterfree_close(void);
 
 #endif
