@@ -164,3 +164,33 @@ IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t 
 		return IBUTTERFREE_ERROR;
 	}
 }
+
+IBUTTERFREE_RET ibutterfree_dump_surface(IButterFreeSurface * surface, const char * filename)
+{
+	if (surface)
+	{
+		FILE * f = fopen(filename, "wb");
+		if (f == NULL) 
+		{
+			IBUTTERFREE_LOG_ERROR("Could not open output file %s", filename);
+			return IBUTTERFREE_ERROR;
+		}
+		(void) fprintf(f, "P6\n%d %d\n255\n", surface->desc->width, surface->desc->height);
+		int i;
+		for (i = 0; i < surface->desc->screensize; i++)
+		{
+			static unsigned char color[3];
+			color[0] = (unsigned char)(((surface->screenbuffer[i] & 0x0000FF00) >> 8));
+		   	color[1] = (unsigned char)(((surface->screenbuffer[i] & 0x00FF0000) >> 16));
+		   	color[2] = (unsigned char)(((surface->screenbuffer[i] & 0xFF000000) >> 24));
+			(void) fwrite(color, 1, 3, f);
+		}
+		(void) fclose(f);
+		return IBUTTERFREE_OK;
+	}
+	else
+	{
+		IBUTTERFREE_LOG_ERROR("Failed to dump surface");
+		return IBUTTERFREE_ERROR;
+	}
+}

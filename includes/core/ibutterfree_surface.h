@@ -141,4 +141,14 @@ IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * i
  */
 IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t color);
 
+/**
+ * @brief Dump surface in a PPM File.
+ *
+ * @param surface Pointer of surface.
+ * @param filename File PPM with dump surface.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
+ * IBUTTERFREE_ERROR.
+ */
+IBUTTERFREE_RET ibutterfree_dump_surface(IButterFreeSurface * surface, const char * filename);
+
 #endif
