@@ -54,7 +54,7 @@ IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface * surface, int px, i
 	            int b = (rgba & 0xFF000000) >> 24;  				 // blue
 	            int g = (rgba & 0x00FF0000) >> 16; 					 // green
 	            int r = (rgba & 0x0000FF00) >> 8; 					 // red
-	            unsigned short int t = r << 11 | g << 5 | b;
+	            unsigned short int t = (r >> 3 << 11) | (g >> 2 << 5) | (b >> 3);
 	            *((unsigned short int *)(bp + location)) = t;
 			}
 		}
