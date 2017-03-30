@@ -5,6 +5,7 @@ add_library (ibutterfree SHARED
 		core/ibutterfree_draw.c
 		core/ibutterfree_image.c
 		core/ibutterfree_font.c
+		core/ibutterfree_event.c
 		)
 
 set(CMAKE_C_FLAGS "-Wall -Werror -O3")
