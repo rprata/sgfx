@@ -29,13 +29,13 @@ IBUTTERFREE_RET ibutterfree_event_init(IButterFreeSurface * surface)
 }
 
 IBUTTERFREE_RET ibutterfree_event_read(IButterFreeTouchStruct * bfts)
-{
+{	
 	int counter_x = 0, counter_y = 0, counter_pressure = 0;
 	int sum_x = 0, sum_y = 0, sum_pressure = 0;
 	if (m_bfevs)
 	{
 		bfts->pressure = -1;
-		while (bfts->pressure != 0)
+		while (1)
 		{
 			if (read(m_bfevs->evfd, &m_bfevs->ev, sizeof(struct input_event)) != -1)
 			{
@@ -53,6 +53,8 @@ IBUTTERFREE_RET ibutterfree_event_read(IButterFreeTouchStruct * bfts)
 		            }
 		            if(m_bfevs->ev.code == ABS_PRESSURE)
 		            {
+		            	if (m_bfevs->ev.value == 0)	
+		            		break;
 		                sum_pressure += m_bfevs->ev.value;
 		                counter_pressure++;
 		            }
