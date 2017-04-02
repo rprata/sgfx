@@ -18,7 +18,7 @@ IBUTTERFREE_RET ibutterfree_event_init(IButterFreeSurface * surface)
 		y_factor = (Y_MAX - Y_MIN)/yres;
 
 		m_bfevs = (IButterFreeEventStruct *) malloc(sizeof(IButterFreeEventStruct));
-		m_bfevs->evfd = open(INPUT, O_RDONLY);
+		m_bfevs->evfd = open(ibutterfree_get_fdev(), O_RDONLY);
 		return IBUTTERFREE_OK;
 	}
 	else

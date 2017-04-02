@@ -46,8 +46,7 @@
 #include <sys/ioctl.h>
 
 #include "ibutterfree_log.h"
-
-#define FB "/dev/fb0"
+#include "ibutterfree_config.h"
 
 /**
  * @brief The kind of value that is returned by IButterFree library.

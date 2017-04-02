@@ -9,7 +9,9 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         m_bfs->screensize = 0;
         m_bfs->fbp = NULL;
 
-    	m_bfs->fbfd = open(FB, O_RDWR);
+        ibutterfree_config_read();
+    	
+        m_bfs->fbfd = open(ibutterfree_get_fdfb(), O_RDWR);
         if (m_bfs->fbfd == -1)
         {
             IBUTTERFREE_LOG_ERROR("Cannot open framebuffer device");

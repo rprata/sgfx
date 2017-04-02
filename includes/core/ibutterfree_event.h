@@ -22,11 +22,10 @@
  * @file ibutterfree_event.h
  * @author Renan Prata
  * @date 26 Mar 2017
- * @brief File containing event functions/callbacks of IButterFree Library.
+ * @brief File containing event functions of IButterFree Library.
  *
- * File containing event functions/callbacs of IButterFree Library.
- * IButterFree has the possibility to getevent from touchscreen or
- * from another device.
+ * File containing event functions of IButterFree Library.
+ * IButterFree has the possibility to get event from touchscreen
  */
 
 #ifndef __IBUTTERFREE_EVENT_H__
@@ -34,8 +33,6 @@
 
 #include "ibutterfree_surface.h"
 #include <linux/input.h>
-
-#define INPUT "/dev/input/event3"
 
 #define X_MAX 	4096
 #define Y_MAX	4096
@@ -49,17 +46,22 @@
 #define ABS_PRESSURE	0x18
 
 
+/**
+ * @brief Structure relative of surface handler.
+ */
 typedef struct {
-	int evfd; /**< Handler of IButterFreeEventStruct. */
-	struct input_event ev; /**< Handler of Input Event */
+	int evfd; 				/**< Handler of IButterFreeEventStruct. */
+	struct input_event ev;	/**< Handler of Input Event */
 } IButterFreeEventStruct;
 
-
+/**
+ * @brief Structure relative of touchscreen event.
+ */
 typedef struct {
-	int pressed; /**< If 1, it is pressed. Else, it is not pressed. */
-	int x_abs; /**< Absolute position in x-axys. */
-	int y_abs; /**< Absolute position in y-axys. */
-	int pressure; /**< Pressure value (0 - 65555). */
+	int pressed;	/**< If 1, it is pressed. Else, it is not pressed. */
+	int x_abs; 		/**< Absolute position in x-axys. */
+	int y_abs; 		/**< Absolute position in y-axys. */
+	int pressure; 	/**< Pressure value (0 - 65555). */
 } IButterFreeTouchStruct;
 
 // struct IButterFreeEventCB;
@@ -77,8 +79,28 @@ typedef struct {
 
 IButterFreeEventStruct * m_bfevs;
 
+/**
+ * @brief Initializes event module.
+ *
+ * @param surface Surface that is used to draw.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
+ * IBUTTERFREE_ERROR.
+ */
 IBUTTERFREE_RET ibutterfree_event_init(IButterFreeSurface * surface);
+
+/**
+ * @brief Finishes event module.
+ *
+ */
 void ibutterfree_event_destroy(void);
+
+/**
+ * @brief  Reads event from touchscreen.
+ *
+ * @param bfts IButterFreeTouchStruct used to read.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
+ * IBUTTERFREE_ERROR.
+ */
 IBUTTERFREE_RET ibutterfree_event_read(IButterFreeTouchStruct * bfts);
 
 #endif
