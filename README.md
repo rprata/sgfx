@@ -1,7 +1,7 @@
 # IButterFree 
 
 ## What is IButterFree?
-IButterFree is a lightweight embedded library for displays and touchscreens providing everything required to build a fully featured embedded GUI. The IButterFree library has been designed to be the smallest, fastest and most advanced embedded library for display and touchscreen solutions.
+IButterFree is a lightweight embedded library for displays and touchscreens providing everything required to build a fully featured embedded GUI. The IButterFree library has been designed to be the smallest, fastest and most advanced embedded library for display and touchscreen solutions. For more information, access the [official website](http://ibutterfree.com).
 
 ## Goals of IButterFree
 * Small memory Footprint;
