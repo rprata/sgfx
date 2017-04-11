@@ -1,20 +1,11 @@
-/** 
- * 8x8 monochrome bitmap fonts for rendering
- * Author: Daniel Hepper <daniel@hepper.net>
- * 
- * License: Public Domain
- * 
- * Based on:
- * // Summary: based in https://github.com/dhepper/font8x8/
- * // 8x8 monochrome bitmap fonts for rendering
- * //
- * // Author:
- * //     Marcel Sondaar
- * //     International Business Machines (public domain VGA fonts)
- * //
- * // License:
- * //     Public Domain
- **/
+/****************************************************************************
+ * Copyright (C) 2017 by Renan Prata                                        *
+ *                                                                          *
+ * This file is part of IButterFree.                                        *
+ *                                                                          *
+ * This software may be modified and distributed under the terms            *
+ * of the MIT license. See the LICENSE file for details.                    *
+ ****************************************************************************/
 
 // Constant: font8x8_basic
 // Contains an 8x8 font map for unicode points U+0000 - U+007F (basic latin)

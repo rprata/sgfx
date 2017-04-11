@@ -29,4 +29,4 @@ $ make
 ```
 
 ## License
-IButterFree is licensed under the GNU Lesser General Public License (LGPL) version 2.1 or later. However, IButterFree incorporates several optional parts and optimizations that are covered by the GNU General Public License (GPL) version 3. If those parts get used the GPL applies to all of IButterFree.
+IButterFree may be modified and distributed under the terms of the MIT license. See the LICENSE file for details.
