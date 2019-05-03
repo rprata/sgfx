@@ -24,7 +24,7 @@ int main (int argc, char ** argv)
 			ibutterfree_event_init(&surface);
 			ibutterfree_set_color(&surface, (int32_t)0x00FF00FF);
 			ibutterfree_fill_circle(&surface, xres/2, yres/2, r);
-			ibutterfree_flip(&surface);
+			ibutterfree_flip(&surface, NULL);
 			IButterFreeTouchStruct bfts;
 			while(1)
 			{
@@ -41,7 +41,7 @@ int main (int argc, char ** argv)
 					ibutterfree_set_color(&surface, (int32_t)0x00FF00FF);
 				}
 				ibutterfree_fill_circle(&surface, xres/2, yres/2, r);
-				ibutterfree_flip(&surface);
+				ibutterfree_flip(&surface, NULL);
 			}
 			ibutterfree_event_destroy();
 			ibutterfree_destroy_surface(&surface);

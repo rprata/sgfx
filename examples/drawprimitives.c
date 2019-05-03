@@ -42,7 +42,7 @@ int main (int argc, char ** argv)
 
 			ibutterfree_dump_surface(&surface, "image-output.ppm");
 
-			ibutterfree_flip(&surface);
+			ibutterfree_flip(&surface, NULL);
 			ibutterfree_destroy_surface(&surface);
 		}		
 	}

@@ -25,6 +25,24 @@
 #include "ibutterfree_surface.h"
 
 /**
+ * @brief Structure relative of point.
+ */
+typedef struct {
+	int x; /**< Position in x-axis. */
+	int y; /**< Position in y-axis. */
+} IButterFreePoint;
+
+/**
+ * @brief Structure relative of rectangle.
+ */
+typedef struct {
+	int x; /**< Position in x-axis. */
+	int y; /**< Position in y-axis. */
+	int w; /**< Width of rectangle. */
+	int h; /**< Height of rectangle. */
+} IButterFreeRect;
+
+/**
  * @brief Draw a point on screenbuffer.
  *
  * @param surface Surface that is used to draw.
@@ -112,9 +130,10 @@ IBUTTERFREE_RET ibutterfree_set_color(IButterFreeSurface * surface, int32_t colo
  * @brief Flip the surface to update screen.
  *
  * @param surface Surface that is used to draw.
+ * @param rect Rectangle area that is used to draw. If value is NULL, screensize is updated.
  * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
  * IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface);
+IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface, IButterFreeRect * rect);
 
 #endif

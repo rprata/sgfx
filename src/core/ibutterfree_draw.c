@@ -438,7 +438,7 @@ IBUTTERFREE_RET ibutterfree_set_color(IButterFreeSurface * surface, int32_t colo
 	return IBUTTERFREE_OK;
 }
 
-IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface)
+IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface, IButterFreeRect * rect)
 {
 	if (surface && m_bfs)
 	{
@@ -446,9 +446,19 @@ IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface)
 		
 		if (surface->desc->type == PRIMARY)
 		{
-			for (i = 0; i < surface->desc->screensize; i += 1)
+			if (!rect) 
 			{
-				__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
+				for (i = 0; i < surface->desc->screensize; i += 1)
+				{
+					__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
+				}
+			} 
+			else 
+			{
+				for (i = rect->x; i < (rect->w * rect->h); i += 1)
+				{
+					__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
+				}
 			}
 		}
 

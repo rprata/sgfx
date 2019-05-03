@@ -27,7 +27,7 @@ int main (int argc, char ** argv)
 				for (i = xres/2; i >= 0; i -= 1)
 				{
 					ibutterfree_fill_circle(&surface, xres/2, yres/2, i);
-					ibutterfree_flip(&surface);
+					ibutterfree_flip(&surface, NULL);
 					usleep(10);
 					ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
 				}

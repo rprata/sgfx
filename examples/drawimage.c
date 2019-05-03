@@ -24,7 +24,7 @@ int main (int argc, char ** argv)
 			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.ppm", xres/4, yres/2, xres/7, xres/7, IBUTTERFREE_IMAGE_TYPE_PPM);
 			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.png", xres/7, yres/2, xres/7, xres/7, IBUTTERFREE_IMAGE_TYPE_PNG);
 			ibutterfree_draw_image(&surface, "../examples/resources/images/IButterFree.png", xres/4, yres/4, xres/7, xres/7, IBUTTERFREE_IMAGE_TYPE_PNG);
-			ibutterfree_flip(&surface);
+			ibutterfree_flip(&surface, NULL);
 			ibutterfree_destroy_surface(&surface);
 		}		
 	}

@@ -26,7 +26,7 @@ int main (int argc, char ** argv)
 			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/3, yres/20, yres/20,  0x00FF00FF, 0x000000FF);
 			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/2, yres/13, yres/13,  0x0000FFFF, 0x000000FF);
 			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/1.5, yres/11, yres/11,  0xFFFFFFFF, 0x000000FF);
-			ibutterfree_flip(&surface);
+			ibutterfree_flip(&surface, NULL);
 			ibutterfree_destroy_surface(&surface);
 		}		
 	}
