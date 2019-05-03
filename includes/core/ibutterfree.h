@@ -35,6 +35,7 @@
 #include <sys/ioctl.h>
 
 #include "ibutterfree_log.h"
+#include "ibutterfree_definitions.h"
 #include "ibutterfree_config.h"
 
 /**

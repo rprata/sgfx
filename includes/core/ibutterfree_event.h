@@ -22,26 +22,20 @@
 
 #include "ibutterfree_surface.h"
 #include <linux/input.h>
+#ifdef __POSIX__
+#include <pthread.h>
+#endif
 
 #define X_MAX 	4096
 #define Y_MAX	4096
 #define X_MIN 	0
 #define Y_MIN 	0
 
-
 #define EV_ABS			0x03
 #define ABS_X			0x00
 #define ABS_Y			0x01
 #define ABS_PRESSURE	0x18
 
-
-/**
- * @brief Structure relative of surface handler.
- */
-typedef struct {
-	int evfd; 				/**< Handler of IButterFreeEventStruct. */
-	struct input_event ev;	/**< Handler of Input Event */
-} IButterFreeEventStruct;
 
 /**
  * @brief Structure relative of touchscreen event.
@@ -53,20 +47,28 @@ typedef struct {
 	int pressure; 	/**< Pressure value (0 - 65555). */
 } IButterFreeTouchStruct;
 
-// struct IButterFreeEventCB;
+/**
+ * @brief Structure of event callback.
+ */
+typedef void (*event_cb_t) (IButterFreeTouchStruct bfts);
 
-// typedef void (*event_cb_t) (const struct IButterFreeEventCB * evt, void * data);
+/**
+ * @brief Register event callback.
+ *
+ * @param surface Surface that is used to draw.
+ * @param event_cb Callback registered.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
+ * IBUTTERFREE_ERROR.
+ */
+void ibutterfree_event_callback_register(IButterFreeSurface * surface, event_cb_t event_cb);
 
-// typedef struct {
-//     event_cb_t cb;
-//     void *data;
-// } IButterFreeEventCB;
+typedef struct {
+	int evfd;
+	struct input_event ev;
+	event_cb_t cb;
+} IButterFreeEventInternalStruct;
 
-// static IButterFreeEventCB saved = { 0, 0 };
-
-// void ibutterfree_event_callback_register(event_cb_t cb, void * data);
-
-IButterFreeEventStruct * m_bfevs;
+IButterFreeEventInternalStruct * m_bfevs;
 
 /**
  * @brief Initializes event module.

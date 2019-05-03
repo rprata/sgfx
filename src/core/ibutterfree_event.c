@@ -1,10 +1,22 @@
 #include "ibutterfree_event.h"
 
-// void ibutterfree_event_callback_register(event_cb_t cb, void * data)
-// {
-//     saved.cb = cb;
-//     saved.data = data;
-// }
+#ifdef __POSIX__
+static bool event_th_running = true;
+static pthread_t event_th;
+void * event_func_th(void * args) 
+{
+	while(event_th_running) 
+	{
+		IButterFreeTouchStruct bfts;
+		if (ibutterfree_event_read(&bfts) == IBUTTERFREE_OK) 
+		{
+			m_bfevs->cb(bfts);
+		}
+	}
+	event_th_running = false;
+	return NULL;
+}
+#endif		
 
 static int x_factor = 1, y_factor = 1;
 
@@ -17,14 +29,30 @@ IBUTTERFREE_RET ibutterfree_event_init(IButterFreeSurface * surface)
 		x_factor = (X_MAX - X_MIN)/xres;
 		y_factor = (Y_MAX - Y_MIN)/yres;
 
-		m_bfevs = (IButterFreeEventStruct *) malloc(sizeof(IButterFreeEventStruct));
+		m_bfevs = (IButterFreeEventInternalStruct *) malloc(sizeof(IButterFreeEventInternalStruct));
 		m_bfevs->evfd = open(ibutterfree_get_fdev(), O_RDONLY);
 		return IBUTTERFREE_OK;
 	}
 	else
 	{
-		IBUTTERFREE_LOG_ERROR("Cannot use IButterFreeEventStruct");
+		IBUTTERFREE_LOG_ERROR("ibutterfree_event_init already initialized");
 		return IBUTTERFREE_ERROR;
+	}
+}
+
+void ibutterfree_event_callback_register(IButterFreeSurface * surface, event_cb_t event_cb) {
+	if (m_bfevs) {
+		m_bfevs->cb = event_cb;
+#ifdef __POSIX__
+	event_th_running = true;
+ 	if(pthread_create(&event_th, NULL, event_func_th, NULL)) 
+ 	{
+ 		event_th_running = false;
+		IBUTTERFREE_LOG_ERROR("Cannot create pthread");
+	}		
+#endif		
+	} else {
+		IBUTTERFREE_LOG_ERROR("Cannot register event callback");
 	}
 }
 
@@ -35,7 +63,7 @@ IBUTTERFREE_RET ibutterfree_event_read(IButterFreeTouchStruct * bfts)
 	if (m_bfevs)
 	{
 		bfts->pressure = -1;
-		while (1)
+		while (true)
 		{
 			if (read(m_bfevs->evfd, &m_bfevs->ev, sizeof(struct input_event)) != -1)
 			{
@@ -80,6 +108,13 @@ void ibutterfree_event_destroy(void)
 	if (m_bfevs)
 	{
 		close(m_bfevs->evfd);
+#ifdef __POSIX__
+		if (m_bfevs->cb && event_th_running)
+		{
+			event_th_running = false;
+			pthread_join(event_th, NULL);
+		}
+#endif
 		free(m_bfevs);
 		m_bfevs = NULL;
 	}

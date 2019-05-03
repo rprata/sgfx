@@ -11,4 +11,10 @@
 #define __IBUTTERFREE_DEFINITIONS_H__
 
 #define sign(x) ((x > 0)? 1 : ((x < 0)? -1: 0))
+
+typedef enum _bool {
+	false = 0, 
+	true = 1
+} bool;
+
 #endif

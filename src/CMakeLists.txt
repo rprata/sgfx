@@ -11,6 +11,12 @@ add_library (ibutterfree SHARED
 
 set(CMAKE_C_FLAGS "-Wall -Werror -O3")
 
+
+if(${POSIX_SUPPORT})
+	add_definitions(-D__POSIX__)
+	target_link_libraries(ibutterfree pthread)	
+endif()
+
 target_include_directories (ibutterfree PUBLIC
 		${PROJECT_SOURCE_DIR}/includes/core
 		${PROJECT_SOURCE_DIR}/includes/utils
