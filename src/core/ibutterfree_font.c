@@ -2,10 +2,17 @@
 
 extern int32_t * __resize_bilinear(int32_t * input, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight);
 
-void __ibutterfree_render(IButterFreeSurface * surface, char * bitmap, int x, int y, int width, int height, int32_t background, int32_t foreground)
+IBUTTERFREE_RET __ibutterfree_render(IButterFreeSurface * surface, char * bitmap, int x, int y, int width, int height, int32_t background, int32_t foreground)
 {
 	int i, j, color;
 	int32_t input_image[SIZE];
+
+	if (!surface) 
+	{
+		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurface");
+		ibutterfree_set_message_error("Invalid IButterFreeSurface");
+		return IBUTTERFREE_ERROR;
+	}
 
 	for (i = 0; i < WIDTH; i++)
 	{
@@ -31,6 +38,7 @@ void __ibutterfree_render(IButterFreeSurface * surface, char * bitmap, int x, in
 			ibutterfree_draw_point(surface, x + j, y + i);
 		}
 	}
+	return IBUTTERFREE_OK;
 }
 
 
@@ -39,7 +47,10 @@ IBUTTERFREE_RET ibutterfree_draw_text(IButterFreeSurface * surface, const char *
 	int i;
 	for (i = 0; i < strlen(text); i++)
 	{
-		__ibutterfree_render(surface, ibutterfree_font8x8_basic[(int)text[i]], x + i*(width + SPACE), y, width, height,background, foreground);
+		if(__ibutterfree_render(surface, ibutterfree_font8x8_basic[(int)text[i]], x + i*(width + SPACE), y, width, height,background, foreground)) 
+		{
+			return IBUTTERFREE_ERROR;
+		}
 	}
 	return IBUTTERFREE_OK;
 }

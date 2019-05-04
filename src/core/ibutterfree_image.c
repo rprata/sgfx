@@ -238,6 +238,7 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			if (bitmapData == NULL)
 			{
 				IBUTTERFREE_LOG_ERROR("Error to create bmp image.");
+				ibutterfree_set_message_error("Error to create bmp image");
 				return IBUTTERFREE_ERROR;
 			}
 			int i, j;
@@ -307,6 +308,7 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			if (ppmData == NULL)
 			{
 				IBUTTERFREE_LOG_ERROR("Error to create ppm image.");
+				ibutterfree_set_message_error("Error to create ppm image");
 				return IBUTTERFREE_ERROR;
 			}
 
@@ -369,6 +371,7 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 			ibutterfree_upng_decode(ibutterfree_upng);
 			if (ibutterfree_upng_get_error(ibutterfree_upng) != UPNG_EOK) {
 				IBUTTERFREE_LOG_ERROR("Error to create png image.");
+				ibutterfree_set_message_error("Error to create png image.");
 				return IBUTTERFREE_ERROR;
 			}
 
@@ -443,6 +446,7 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface * surface, const char 
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Error to create image.");
+		ibutterfree_set_message_error("Error to create image.");
 		return IBUTTERFREE_ERROR;
 	}
 }

@@ -1,19 +1,39 @@
-#include <lua5.1/lua.h>
-#include <lua5.1/lualib.h>
-#include <lua5.1/lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
-static int ibutterfree_init(lua_State *L) 
+#include "ibutterfree.h"
+#include "ibutterfree_log.h"
+
+static int init(lua_State *L) 
 {
-	return 0;
+	int argc = luaL_checkint(L, 1);
+	if (ibutterfree_init(argc, NULL) == IBUTTERFREE_OK)
+	{
+	    lua_pushboolean(L, true);
+	    return 1;
+	}
+	else
+	{
+	    lua_pushboolean(L, false);
+	    if (ibutterfree_get_message_error() != NULL)
+    		lua_pushlstring(L, ibutterfree_get_message_error(), strlen(ibutterfree_get_message_error()));
+	    return 2;
+	}
 }
 
 static const struct luaL_Reg ibutterfree [] = {
-	{"init", ibutterfree_init},
+	{"init", init},
 	{NULL, NULL}
 };
 
 int luaopen_ibutterfree (lua_State *L)
 {
-	luaL_register(L, "libibutterfree", ibutterfree);
+#ifdef LUA_5_2
+	luaL_newlib(L, ibutterfree);
+#endif
+#ifdef LUA_5_1
+	luaL_register(L, "ibutterfree", ibutterfree);
+#endif
 	return 1;
 }

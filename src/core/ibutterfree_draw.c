@@ -61,6 +61,7 @@ IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface * surface, int px, i
 		else
 		{
 			IBUTTERFREE_LOG_ERROR("This pixel does not exist.");
+			ibutterfree_set_message_error("This pixel does not exist.");
 			return IBUTTERFREE_ERROR;
 		}
 
@@ -69,6 +70,7 @@ IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface * surface, int px, i
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("__ibutterfree_draw_pixel has failed");
+		ibutterfree_set_message_error("__ibutterfree_draw_pixel has failed");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -106,12 +108,14 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface * surface, in
 		else
 		{
 			IBUTTERFREE_LOG_ERROR("This pixel position is invalid");
+			ibutterfree_set_message_error("This pixel position is invalid");
 			return IBUTTERFREE_ERROR;
 		}
 	}
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurface");
+		ibutterfree_set_message_error("This pixel position is invalid");
 		return IBUTTERFREE_ERROR;
 	}
 	
@@ -127,6 +131,7 @@ IBUTTERFREE_RET ibutterfree_draw_point(IButterFreeSurface * surface, int px, int
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_point has failed");
+		ibutterfree_set_message_error("ibutterfree_draw_point has failed");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -183,6 +188,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 			else
 			{
 				IBUTTERFREE_LOG_ERROR("Invalid value for x.");
+				ibutterfree_set_message_error("Invalid value for x.");
 				return IBUTTERFREE_ERROR;
 			}
 		}
@@ -197,6 +203,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 			else
 			{
 				IBUTTERFREE_LOG_ERROR("Invalid value for y.");
+				ibutterfree_set_message_error("Invalid value for y.");
 				return IBUTTERFREE_ERROR;
 			}
 		}
@@ -254,6 +261,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface * surface, int x0, int 
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_line has failed");
+		ibutterfree_set_message_error("ibutterfree_draw_line has failed");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -313,6 +321,7 @@ IBUTTERFREE_RET ibutterfree_draw_circle(IButterFreeSurface * surface, double cx,
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_circle has failed");
+		ibutterfree_set_message_error("ibutterfree_draw_circle has failed");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -378,6 +387,7 @@ IBUTTERFREE_RET ibutterfree_fill_circle(IButterFreeSurface * surface, double cx,
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("ibutterfree_fill_circle has failed");
+		ibutterfree_set_message_error("ibutterfree_fill_circle has failed");		
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -389,6 +399,7 @@ IBUTTERFREE_RET ibutterfree_draw_rect(IButterFreeSurface * surface, int x0, int 
 		if (h <= 0 && w <= 0)
 		{
 			IBUTTERFREE_LOG_ERROR("Wrong values for width and height");
+			ibutterfree_set_message_error("Wrong values for width and height");		
 			return IBUTTERFREE_ERROR;
 		}
 		int x1 = x0 + w;
@@ -401,7 +412,8 @@ IBUTTERFREE_RET ibutterfree_draw_rect(IButterFreeSurface * surface, int x0, int 
 	}
 	else
 	{
-		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_circle has failed");		
+		IBUTTERFREE_LOG_ERROR("ibutterfree_draw_rect has failed")
+		ibutterfree_set_message_error("ibutterfree_draw_rect has failed");		
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -414,6 +426,7 @@ IBUTTERFREE_RET ibutterfree_fill_rect(IButterFreeSurface * surface, int x0, int 
 		if (h <= 0 && w <= 0)
 		{
 			IBUTTERFREE_LOG_ERROR("Wrong values for width and height");
+			ibutterfree_set_message_error("Wrong values for width and height");		
 			return IBUTTERFREE_ERROR;
 		}
 		int x1 = x0 + w;
@@ -427,7 +440,8 @@ IBUTTERFREE_RET ibutterfree_fill_rect(IButterFreeSurface * surface, int x0, int 
 	}
 	else
 	{
-		IBUTTERFREE_LOG_ERROR("ibutterfree_fill_rect has failed");		
+		IBUTTERFREE_LOG_ERROR("ibutterfree_fill_rect has failed");
+		ibutterfree_set_message_error("ibutterfree_fill_rect has failed");		
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -457,7 +471,7 @@ IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface, IButterFreeRect *
 			{
 				for (i = rect->x; i < (rect->w * rect->h); i += 1)
 				{
-					__ibutterfree_draw_pixel(surface, i % surface->desc->width, i / surface->desc->width, surface->screenbuffer[i]);
+					__ibutterfree_draw_pixel(surface, i % surface->desc->width + rect->y, i / surface->desc->width + rect->y, surface->screenbuffer[i]);
 				}
 			}
 		}
@@ -472,6 +486,7 @@ IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface * surface, IButterFreeRect *
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurface or IButterFreeStruct");
+		ibutterfree_set_message_error("Invalid IButterFreeSurface or IButterFreeStruct");
 		return IBUTTERFREE_ERROR;
 	}
 

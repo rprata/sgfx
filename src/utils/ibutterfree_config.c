@@ -38,6 +38,7 @@ void ibutterfree_config_read(void)
 	else 
 	{
 	    IBUTTERFREE_LOG_ERROR("Couldn't open file");
+		ibutterfree_set_message_error("Couldn't open file");
 	}
 }
 

@@ -36,6 +36,7 @@ IBUTTERFREE_RET ibutterfree_event_init(IButterFreeSurface * surface)
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("ibutterfree_event_init already initialized");
+		ibutterfree_set_message_error("ibutterfree_event_init already initialized");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -49,10 +50,12 @@ void ibutterfree_event_callback_register(IButterFreeSurface * surface, event_cb_
  	{
  		event_th_running = false;
 		IBUTTERFREE_LOG_ERROR("Cannot create pthread");
+		ibutterfree_set_message_error("Cannot create pthread");
 	}		
 #endif		
 	} else {
 		IBUTTERFREE_LOG_ERROR("Cannot register event callback");
+		ibutterfree_set_message_error("Cannot register event callback");
 	}
 }
 
@@ -99,6 +102,7 @@ IBUTTERFREE_RET ibutterfree_event_read(IButterFreeTouchStruct * bfts)
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Cannot use ibutterfree_event_read()");
+		ibutterfree_set_message_error("Cannot use ibutterfree_event_read()");
 		return IBUTTERFREE_ERROR;
 	}
 }

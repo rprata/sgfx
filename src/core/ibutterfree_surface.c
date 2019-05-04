@@ -7,12 +7,14 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 	if (!m_bfs) 
 	{
 		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeStruct");
+		ibutterfree_set_message_error("Invalid IButterFreeStruct");
 		return IBUTTERFREE_ERROR;
 	}
 
 	if (!surface)
 	{
 		IBUTTERFREE_LOG_ERROR("IButterFreeSurface cannot be created");
+		ibutterfree_set_message_error("IButterFreeSurface cannot be created");
 		return IBUTTERFREE_ERROR;		
 	}
 
@@ -25,12 +27,14 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 	if (!surface->desc)
 	{
 		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurfaceDescription");
+		ibutterfree_set_message_error("Invalid IButterFreeSurfaceDescription");
 		return IBUTTERFREE_ERROR;		
 	}
 
 	if (surface->desc->width < -1 || surface->desc->height < -1)
 	{
 		IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurfaceDescription");
+		ibutterfree_set_message_error("Invalid IButterFreeSurfaceDescription");
 		return IBUTTERFREE_ERROR;		
 	}
 
@@ -51,6 +55,7 @@ IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButter
 	if (!surface->screenbuffer)
 	{
 		IBUTTERFREE_LOG_ERROR("ScreenBuffer cannot be created");
+		ibutterfree_set_message_error("ScreenBuffer cannot be created");
 		return IBUTTERFREE_ERROR;
 	}
 
@@ -91,6 +96,7 @@ IBUTTERFREE_RET ibutterfree_get_resolution(IButterFreeSurface * surface, int * x
     else
     {
     	IBUTTERFREE_LOG_ERROR("Failed to get resolution");
+    	ibutterfree_set_message_error("Failed to get resolution");
     	return IBUTTERFREE_ERROR;
     }
     
@@ -108,6 +114,7 @@ IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Error to set surface description");
+		ibutterfree_set_message_error("Error to set surface description");
 		return IBUTTERFREE_ERROR;				
 	}
 }
@@ -124,12 +131,14 @@ IBUTTERFREE_RET ibutterfree_surface_get_description(IButterFreeSurface * surface
 		else
 		{
 			IBUTTERFREE_LOG_ERROR("Error to get surface description [description is NULL]");
+			ibutterfree_set_message_error("Error to get surface description [description is NULL]");
 			return IBUTTERFREE_ERROR;
 		}
 	}
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Error to get surface description [surface is NULL]");
+		ibutterfree_set_message_error("Error to get surface description [surface is NULL]");
 		return IBUTTERFREE_ERROR;				
 	}
 }
@@ -142,7 +151,8 @@ IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * i
 	}
 	else
 	{
-		IBUTTERFREE_LOG_ERROR("Error to get surface id [surface is NULL]");		
+		IBUTTERFREE_LOG_ERROR("Error to get surface id [surface is NULL]");
+		ibutterfree_set_message_error("Error to get surface id [surface is NULL]");		
 	}
 	return IBUTTERFREE_OK;
 }
@@ -161,6 +171,7 @@ IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t 
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Failed to clear surface");
+		ibutterfree_set_message_error("Failed to clear surface");
 		return IBUTTERFREE_ERROR;
 	}
 }
@@ -172,7 +183,10 @@ IBUTTERFREE_RET ibutterfree_dump_surface(IButterFreeSurface * surface, const cha
 		FILE * f = fopen(filename, "wb");
 		if (f == NULL) 
 		{
-			IBUTTERFREE_LOG_ERROR("Could not open output file %s", filename);
+			char msg[256];
+			sprintf(msg, "Could not open output file %s", filename);
+			IBUTTERFREE_LOG_ERROR(msg);
+			ibutterfree_set_message_error(msg);
 			return IBUTTERFREE_ERROR;
 		}
 		(void) fprintf(f, "P6\n%d %d\n255\n", surface->desc->width, surface->desc->height);
@@ -191,6 +205,7 @@ IBUTTERFREE_RET ibutterfree_dump_surface(IButterFreeSurface * surface, const cha
 	else
 	{
 		IBUTTERFREE_LOG_ERROR("Failed to dump surface");
+		ibutterfree_set_message_error("Failed to dump surface");
 		return IBUTTERFREE_ERROR;
 	}
 }
