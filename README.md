@@ -9,6 +9,7 @@ IButterFree is a lightweight embedded library for displays and touchscreens prov
 * Support of advanced graphics operations such as multiple alpha blending modes;
 * No kernel modifications;
 * Lightweight, OpenSource, Portable and Modular;
+* Lua support
 
 ## Installation
 IButterFree requires [CMake](https://cmake.org/) to compile. Follow the instructions:
