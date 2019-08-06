@@ -8,7 +8,7 @@ set(IBUTTERFREE_VERSION_STRING ${IBUTTERFREE_VERSION_MAJOR}.${IBUTTERFREE_VERSIO
 
 set(POSIX_SUPPORT 1)
 set(LUA_SUPPORT 1)
-set(LUA_VERSION 52)
+set(LUA_VERSION 51)
 
 add_subdirectory (src)
 add_subdirectory (examples)

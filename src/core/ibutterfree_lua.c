@@ -5,10 +5,9 @@
 #include "ibutterfree.h"
 #include "ibutterfree_log.h"
 
-static int init(lua_State *L) 
+static int _lua_ibutterfree_init(lua_State *L) 
 {
-	int argc = luaL_checkint(L, 1);
-	if (ibutterfree_init(argc, NULL) == IBUTTERFREE_OK)
+	if (ibutterfree_init(0, NULL) == IBUTTERFREE_OK)
 	{
 	    lua_pushboolean(L, true);
 	    return 1;
@@ -22,8 +21,15 @@ static int init(lua_State *L)
 	}
 }
 
+static int _lua_ibutterfree_close(lua_State *L) 
+{
+	ibutterfree_close();
+	return 1;
+}
+
 static const struct luaL_Reg ibutterfree [] = {
-	{"init", init},
+	{"init", _lua_ibutterfree_init},
+	{"close", _lua_ibutterfree_close},	
 	{NULL, NULL}
 };
 
