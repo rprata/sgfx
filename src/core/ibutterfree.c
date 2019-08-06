@@ -16,6 +16,8 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         {
             IBUTTERFREE_LOG_ERROR("Cannot open framebuffer device");
             ibutterfree_set_message_error("Cannot open framebuffer device");
+            free(m_bfs);
+            m_bfs = NULL;
             return IBUTTERFREE_ERROR;
         }
 
@@ -23,6 +25,8 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         {
             IBUTTERFREE_LOG_ERROR("Reading FBIOGET_FSCREENINFO information");
             ibutterfree_set_message_error("Reading FBIOGET_FSCREENINFO information");
+            free(m_bfs);
+            m_bfs = NULL;            
             return IBUTTERFREE_ERROR;
         }
 
@@ -30,6 +34,8 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         {
             IBUTTERFREE_LOG_ERROR("Reading FBIOGET_VSCREENINFO information");
             ibutterfree_set_message_error("Reading FBIOGET_VSCREENINFO information");
+            free(m_bfs);
+            m_bfs = NULL;            
             return IBUTTERFREE_ERROR;
         }
 
@@ -42,6 +48,8 @@ IBUTTERFREE_RET ibutterfree_init(int argc, char ** argv)
         {
             IBUTTERFREE_LOG_ERROR("Failed to map framebuffer device to memory");
             ibutterfree_set_message_error("Failed to map framebuffer device to memory");
+            free(m_bfs);
+            m_bfs = NULL;            
             return IBUTTERFREE_ERROR;
         }
 
