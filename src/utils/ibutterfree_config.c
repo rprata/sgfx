@@ -8,8 +8,8 @@ void ibutterfree_config_read(void)
 	if (!m_bfcs)
 	{
 		m_bfcs = (IButterFreeConfigStruct *) malloc(sizeof(IButterFreeConfigStruct));
-		strncpy(m_bfcs->fdfb, FB, strlen(FB));
-		strncpy(m_bfcs->fdev, INPUT, strlen(INPUT));
+		memcpy(m_bfcs->fdfb, FB, strlen(FB));
+		memcpy(m_bfcs->fdev, INPUT, strlen(INPUT));
 	}
 
 	fp = fopen(CONFIG, "r");
@@ -21,13 +21,13 @@ void ibutterfree_config_read(void)
 			{
 				if (strstr(buff, "FDFB") != NULL)
 				{
-					strncpy(m_bfcs->fdfb, buff + 5, strlen(buff + 5) - 1);
+					memcpy(m_bfcs->fdfb, buff + 5, strlen(buff + 5) - 1);
 					*(m_bfcs->fdfb + strlen(buff + 5) - 1) = '\0';
 					IBUTTERFREE_LOG_TRACK("fdfb: %s", m_bfcs->fdfb);
 				}
 				else if (strstr(buff, "FDEV") != NULL)
 				{
-					strncpy(m_bfcs->fdev, buff + 5, strlen(buff + 5) - 1);
+					memcpy(m_bfcs->fdev, buff + 5, strlen(buff + 5) - 1);
 					*(m_bfcs->fdev + strlen(buff + 5) - 1) = '\0';
 					IBUTTERFREE_LOG_TRACK("fdev: %s", m_bfcs->fdev);
 				}

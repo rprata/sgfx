@@ -107,7 +107,6 @@ IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface
 	if (surface)
 	{
 		free(surface->desc);
-		surface->desc = NULL;
 		memcpy(surface->desc, desc, sizeof(IButterFreeSurfaceDescription));
 		return IBUTTERFREE_OK;
 	}

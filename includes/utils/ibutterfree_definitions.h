@@ -17,4 +17,6 @@ typedef enum _bool {
 	true = 1
 } bool;
 
+#define NON_NULL(x) ((x)?(x):"")
+
 #endif
