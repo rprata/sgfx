@@ -7,8 +7,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Installing dependences
-          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/* && apt-get install -y gcc && apt-get install cmake'
+          name: Configuring linux environment
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing tools
+          command: 'apt-get update && apt-get install -y gcc g++ cmake'
       - run:
           name: Configuring build environment
           command: 'cmake CMakeLists.txt -Bbuild'
