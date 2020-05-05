@@ -1,4 +1,6 @@
-# IButterFree 
+
+# IButterFree
+[![CircleCI](https://circleci.com/gh/rprata/ibutterfree.svg?style=svg)](https://circleci.com/gh/rprata/ibutterfree)
 
 ## What is IButterFree?
 IButterFree is a lightweight embedded library for displays and touchscreens providing everything required to build a fully featured embedded GUI. The IButterFree library has been designed to be the smallest, fastest and most advanced embedded library for display and touchscreen solutions. For more information, access the [official website](http://ibutterfree.com).
