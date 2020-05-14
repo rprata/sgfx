@@ -19,13 +19,13 @@ int main (int argc, char ** argv)
 		desc.buffer = DOUBLE; 
 		if(ibutterfree_create_surface(&surface, &desc) == IBUTTERFREE_OK)
 		{
-			int xres, yres;
+			int xres = 0, yres = 0;
 			ibutterfree_get_resolution(&surface, &xres, &yres);
 			ibutterfree_clear_surface(&surface, (int32_t) 0x000000FF);
-			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/4, yres/40, yres/40,  0xFF0000FF, 0x000000FF);
-			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/3, yres/20, yres/20,  0x00FF00FF, 0x000000FF);
-			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/2, yres/13, yres/13,  0x0000FFFF, 0x000000FF);
-			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/1.5, yres/11, yres/11,  0xFFFFFFFF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/7, xres/40, yres/40,  0xFF0000FF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/3, xres/20, yres/20,  0x00FF00FF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/2, xres/16, yres/16,  0x0000FFFF, 0x000000FF);
+			ibutterfree_draw_text(&surface, "Hello World", xres/7, yres/1.5, xres/13, yres/13,  0xFFFFFFFF, 0x000000FF);
 			ibutterfree_flip(&surface, NULL);
 			ibutterfree_destroy_surface(&surface);
 		}		

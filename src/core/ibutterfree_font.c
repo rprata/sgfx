@@ -33,7 +33,7 @@ IBUTTERFREE_RET __ibutterfree_render(IButterFreeSurface * surface, char * bitmap
 	{
 		for (j = 0; j < width; j++)
 		{
-			long absPosition = j + width * i;
+			long absPosition = j + width* i;
 			ibutterfree_set_color(surface, resized_image[absPosition]);
 			ibutterfree_draw_point(surface, x + j, y + i);
 		}
@@ -47,7 +47,7 @@ IBUTTERFREE_RET ibutterfree_draw_text(IButterFreeSurface * surface, const char *
 	int i;
 	for (i = 0; i < strlen(text); i++)
 	{
-		if(__ibutterfree_render(surface, ibutterfree_font8x8_basic[(int)text[i]], x + i*(width + SPACE), y, width, height,background, foreground)) 
+		if(__ibutterfree_render(surface, ibutterfree_font8x8_basic[(int)text[i]], x + i*(width + SPACE), y, width, height, background, foreground) == IBUTTERFREE_ERROR) 
 		{
 			return IBUTTERFREE_ERROR;
 		}
