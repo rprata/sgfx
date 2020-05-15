@@ -3,8 +3,9 @@
  *                                                                          *
  * This file is part of IButterFree.                                        *
  *                                                                          *
- * This software may be modified and distributed under the terms			*
- * of the MIT license. See the LICENSE file for details.					*
+ * This software may be modified and distributed under the terms
+ ** of the MIT license. See the LICENSE file for details.
+ **
  ****************************************************************************/
 
 /**
@@ -29,37 +30,37 @@
  * @brief Structure relative of screenbuffer type used by surface.
  */
 typedef enum {
-	SINGLE, /**< Single-Buffer. */
-	DOUBLE  /**< Double-Buffer */
+  SINGLE, /**< Single-Buffer. */
+  DOUBLE  /**< Double-Buffer */
 } IButterFreeSurfaceBuffer;
 
 /**
  * @brief Structure relative of surface type.
  */
 typedef enum {
-	PRIMARY, /**< Primary surface is the main surface used to draw. */
-	NORMAL   /**< Auxiliary surface. */
+  PRIMARY, /**< Primary surface is the main surface used to draw. */
+  NORMAL   /**< Auxiliary surface. */
 } IButterFreeSurfaceType;
 
 /**
  * @brief Structure relative of surface description.
  */
 typedef struct {
-	int width;  						/**< Width of surface */
-	int height; 						/**< Height of surface */
-	long screensize;					/**< Screen size of surface */
-	int32_t color;						/**< Color of surface */
-	IButterFreeSurfaceType type;		/**< Type of surface */
-	IButterFreeSurfaceBuffer buffer;	/**< Screenbuffer type of surface */
+  int width;                       /**< Width of surface */
+  int height;                      /**< Height of surface */
+  long screensize;                 /**< Screen size of surface */
+  int32_t color;                   /**< Color of surface */
+  IButterFreeSurfaceType type;     /**< Type of surface */
+  IButterFreeSurfaceBuffer buffer; /**< Screenbuffer type of surface */
 } IButterFreeSurfaceDescription;
 
 /**
  * @brief Structure relative of surface.
  */
 typedef struct {
-	int id;									/**< Id of surface */
-	IButterFreeSurfaceDescription * desc;	/**< Description of surface */
-	int32_t * screenbuffer;					/**< Screenbuffer of surface */
+  int id;                              /**< Id of surface */
+  IButterFreeSurfaceDescription *desc; /**< Description of surface */
+  int32_t *screenbuffer;               /**< Screenbuffer of surface */
 } IButterFreeSurface;
 
 /**
@@ -67,17 +68,18 @@ typedef struct {
  *
  * @param surface Pointer of surface.
  * @param surface Description of surface.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
+IBUTTERFREE_RET ibutterfree_create_surface(IButterFreeSurface *surface,
+                                           IButterFreeSurfaceDescription *desc);
 
 /**
  * @brief Destroys a surface.
  *
  * @param surface Pointer of surface.
  */
-void ibutterfree_destroy_surface(IButterFreeSurface * surface);
+void ibutterfree_destroy_surface(IButterFreeSurface *surface);
 
 /**
  * @brief Returns the screen resolution.
@@ -85,59 +87,67 @@ void ibutterfree_destroy_surface(IButterFreeSurface * surface);
  * @param surface Pointer of surface.
  * @param xres Pointer of width resolution.
  * @param yres Pointer of height resolution.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_get_resolution(IButterFreeSurface * surface, int * xres, int * yres);
+IBUTTERFREE_RET ibutterfree_get_resolution(IButterFreeSurface *surface,
+                                           int *xres, int *yres);
 
 /**
  * @brief Sets surface description.
  *
  * @param surface Pointer of surface.
  * @param desc Description of surface.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_surface_set_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
+IBUTTERFREE_RET
+ibutterfree_surface_set_description(IButterFreeSurface *surface,
+                                    IButterFreeSurfaceDescription *desc);
 
 /**
  * @brief Returns surface description.
  *
  * @param surface Pointer of surface.
  * @param desc Description of surface.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_surface_get_description(IButterFreeSurface * surface, IButterFreeSurfaceDescription * desc);
+IBUTTERFREE_RET
+ibutterfree_surface_get_description(IButterFreeSurface *surface,
+                                    IButterFreeSurfaceDescription *desc);
 
 /**
  * @brief Returns surface id.
  *
  * @param surface Pointer of surface.
  * @param id Pointer of id surface.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface * surface, int * id);
+IBUTTERFREE_RET ibutterfree_surface_get_id(IButterFreeSurface *surface,
+                                           int *id);
 
 /**
  * @brief Clears surface using a color.
  *
  * @param surface Pointer of surface.
  * @param color Color used to clear.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface * surface, int32_t color);
+IBUTTERFREE_RET ibutterfree_clear_surface(IButterFreeSurface *surface,
+                                          int32_t color);
 
 /**
  * @brief Dump surface in a PPM File.
  *
  * @param surface Pointer of surface.
  * @param filename File PPM with dump surface.
- * @return IBUTTERFREE_RET is returned. In case of success, returns IBUTTERFREE_OK, else, it returns 
- * IBUTTERFREE_ERROR.
+ * @return IBUTTERFREE_RET is returned. In case of success, returns
+ * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_dump_surface(IButterFreeSurface * surface, const char * filename);
+IBUTTERFREE_RET ibutterfree_dump_surface(IButterFreeSurface *surface,
+                                         const char *filename);
 
 #endif

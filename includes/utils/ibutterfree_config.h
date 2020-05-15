@@ -3,8 +3,9 @@
  *                                                                          *
  * This file is part of IButterFree.                                        *
  *                                                                          *
- * This software may be modified and distributed under the terms			*
- * of the MIT license. See the LICENSE file for details.					*
+ * This software may be modified and distributed under the terms
+ ** of the MIT license. See the LICENSE file for details.
+ **
  ****************************************************************************/
 
 /**
@@ -13,9 +14,9 @@
  * @date 1 April 2017
  * @brief File containing functions for configure software in runtime.
  *
- * File File containing functions for configure software in 
+ * File File containing functions for configure software in
  * runtime. You can specify outputs framebuffer file descriptor,
- * touchscreen filedescriptor, screen resolution and others. 
+ * touchscreen filedescriptor, screen resolution and others.
  * For more informations, see . file
  */
 
@@ -24,19 +25,19 @@
 
 #include "ibutterfree_log.h"
 
-#define CONFIG 	".ibutterfreeconfig"
-#define FB 	  	"/dev/fb0"
-#define INPUT 	"/dev/input/event3"
+#define CONFIG ".ibutterfreeconfig"
+#define FB "/dev/fb0"
+#define INPUT "/dev/input/event3"
 
 /**
  * @brief Structure relative of configure.
  */
 typedef struct {
-	char fdfb[50];	/**< String related to framebuffer filedescriptor. */
-	char fdev[50]; 	/**< String related to touchscreen filedescriptor */
+  char fdfb[50]; /**< String related to framebuffer filedescriptor. */
+  char fdev[50]; /**< String related to touchscreen filedescriptor */
 } IButterFreeConfigStruct;
 
-IButterFreeConfigStruct * m_bfcs;
+IButterFreeConfigStruct *m_bfcs;
 
 /**
  * @brief Reads IButterFree configuration file.
@@ -50,13 +51,13 @@ void ibutterfree_config_read(void);
  *
  * @return returns a const char * with fdfb information
  */
-const char * ibutterfree_get_fdfb(void);
+const char *ibutterfree_get_fdfb(void);
 
 /**
  * @brief get fdev information (default is /dev/input/event3).
  *
- * @return returns a const char * with fdev information 
+ * @return returns a const char * with fdev information
  */
-const char * ibutterfree_get_fdev(void);
+const char *ibutterfree_get_fdev(void);
 
 #endif
