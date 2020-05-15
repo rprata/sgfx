@@ -28,10 +28,10 @@ static const struct luaL_Reg ibutterfree[] = {{"init", _lua_ibutterfree_init},
                                               {NULL, NULL}};
 
 int luaopen_ibutterfree(lua_State *L) {
-#ifdef LUA_5_2
+#if defined(LUA_5_2) || defined(LUA_5_3)
   luaL_newlib(L, ibutterfree);
 #endif
-#ifdef LUA_5_1
+#if defined(LUA_5_1)
   luaL_register(L, "ibutterfree", ibutterfree);
 #endif
   return 1;
