@@ -19,6 +19,7 @@ SGFX is a lightweight embedded library for displays and touchscreens providing e
 - [x] Raspberry Pi 3
 - [ ] Raspberry Pi 4
 - [ ] Odroid C2
+- [x] Beagle Bone Black
 
 If you have a suggestion or want contribuite with a new portings, create an issue :wink:
 
