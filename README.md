@@ -40,5 +40,26 @@ $ cd build
 $ make
 ```
 
+## Running examples
+First, you must configure framebuffer filedescriptor used by target archtecture. Default value used is `/dev/fb0`, however you can change it creating a `.sgfxconfig`:
+
+```txt
+FDFB=/dev/fb
+```
+
+After that run examples (remember to run as a superuser):
+```bash
+cd build
+./examples/<example>
+```
+
+| Examples         | Definition                      |
+|:----------------:|:-------------------------------:|
+| helloworld       | Hello World Example             |
+| drawprimitives   | Primitives (rect, line...)      |
+| drawimages       | PNG, BMP and TIF                |
+| drawtext         | Draw simple text                |
+| eventexample     | Touch event example             |
+
 ## License
 SGFX may be modified and distributed under the terms of the MIT license. See the LICENSE file for details.
