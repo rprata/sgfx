@@ -1,16 +1,16 @@
-#include <ibutterfree.h>
-#include <ibutterfree_config.h>
-#include <ibutterfree_log.h>
+#include <sgfx.h>
+#include <sgfx_config.h>
+#include <sgfx_log.h>
 
 int main(int argc, char **argv) {
-  IBUTTERFREE_LOG_TRACK("Initializing helloworld application");
-  IBUTTERFREE_RET ret = ibutterfree_init(argc, argv);
+  SGFX_LOG_TRACK("Initializing helloworld application");
+  SGFX_RET ret = sgfx_init(argc, argv);
 
-  if (ret == IBUTTERFREE_OK)
-    IBUTTERFREE_LOG_TRACK("IbutterFree Library can be initialized");
+  if (ret == SGFX_OK)
+    SGFX_LOG_TRACK("SGFX Library can be initialized");
   else
-    IBUTTERFREE_LOG_ERROR("IbutterFree Library cannot be initialized");
-  IBUTTERFREE_LOG_TRACK("Closing helloworld application");
-  ibutterfree_close();
+    SGFX_LOG_ERROR("SGFX Library cannot be initialized");
+  SGFX_LOG_TRACK("Closing helloworld application");
+  sgfx_close();
   return 0;
 }

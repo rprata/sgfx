@@ -6,11 +6,11 @@ add_executable (drawtext drawtext.c)
 add_executable (eventexample eventexample.c)
 
 
-add_definitions(-DIBUTTERFREE_MSG_LEVEL=IBUTTERFREE_MSG_LEVEL_ALL)
+add_definitions(-DSGFX_MSG_LEVEL=SGFX_MSG_LEVEL_ALL)
 
-target_link_libraries (helloworld LINK_PUBLIC ibutterfree)
-target_link_libraries (drawprimitives LINK_PUBLIC ibutterfree)
-target_link_libraries (animationcircle LINK_PUBLIC ibutterfree)
-target_link_libraries (drawimage LINK_PUBLIC ibutterfree)
-target_link_libraries (drawtext LINK_PUBLIC ibutterfree)
-target_link_libraries (eventexample LINK_PUBLIC ibutterfree)
+target_link_libraries (helloworld LINK_PUBLIC sgfx)
+target_link_libraries (drawprimitives LINK_PUBLIC sgfx)
+target_link_libraries (animationcircle LINK_PUBLIC sgfx)
+target_link_libraries (drawimage LINK_PUBLIC sgfx)
+target_link_libraries (drawtext LINK_PUBLIC sgfx)
+target_link_libraries (eventexample LINK_PUBLIC sgfx)

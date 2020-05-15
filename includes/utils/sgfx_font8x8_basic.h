@@ -1,7 +1,7 @@
 /****************************************************************************
  * Copyright (C) 2017 by Renan Prata                                        *
  *                                                                          *
- * This file is part of IButterFree.                                        *
+ * This file is part of SGFX.                                        *
  *                                                                          *
  * This software may be modified and distributed under the terms            *
  * of the MIT license. See the LICENSE file for details.                    *
@@ -9,7 +9,7 @@
 
 // Constant: font8x8_basic
 // Contains an 8x8 font map for unicode points U+0000 - U+007F (basic latin)
-char ibutterfree_font8x8_basic[128][8] = {
+char sgfx_font8x8_basic[128][8] = {
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // U+0000 (nul)
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // U+0001
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // U+0002

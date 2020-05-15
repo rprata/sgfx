@@ -29,7 +29,7 @@ must not be misrepresented as being the original software.
 #include <stdlib.h>
 #include <string.h>
 
-#include "ibutterfree_upng.h"
+#include "sgfx_upng.h"
 
 #define MAKE_BYTE(b) ((b)&0xFF)
 #define MAKE_DWORD(a, b, c, d)                                                 \
@@ -62,52 +62,52 @@ must not be misrepresented as being the original software.
 #define DISTANCE_BUFFER_SIZE (NUM_DISTANCE_SYMBOLS * 2)
 #define CODE_LENGTH_BUFFER_SIZE (NUM_DISTANCE_SYMBOLS * 2)
 
-#define SET_ERROR(ibutterfree_upng, code)                                      \
+#define SET_ERROR(sgfx_upng, code)                                             \
   do {                                                                         \
-    (ibutterfree_upng)->error = (code);                                        \
-    (ibutterfree_upng)->error_line = __LINE__;                                 \
+    (sgfx_upng)->error = (code);                                               \
+    (sgfx_upng)->error_line = __LINE__;                                        \
   } while (0)
 
-#define ibutterfree_upng_chunk_length(chunk) MAKE_DWORD_PTR(chunk)
-#define ibutterfree_upng_chunk_type(chunk) MAKE_DWORD_PTR((chunk) + 4)
-#define ibutterfree_upng_chunk_critical(chunk) (((chunk)[4] & 32) == 0)
+#define sgfx_upng_chunk_length(chunk) MAKE_DWORD_PTR(chunk)
+#define sgfx_upng_chunk_type(chunk) MAKE_DWORD_PTR((chunk) + 4)
+#define sgfx_upng_chunk_critical(chunk) (((chunk)[4] & 32) == 0)
 
-typedef enum ibutterfree_upng_state {
+typedef enum sgfx_upng_state {
   UPNG_ERROR = -1,
   UPNG_DECODED = 0,
   UPNG_HEADER = 1,
   UPNG_NEW = 2
-} ibutterfree_upng_state;
+} sgfx_upng_state;
 
-typedef enum ibutterfree_upng_color {
+typedef enum sgfx_upng_color {
   UPNG_LUM = 0,
   UPNG_RGB = 2,
   UPNG_LUMA = 4,
   UPNG_RGBA = 6
-} ibutterfree_upng_color;
+} sgfx_upng_color;
 
-typedef struct ibutterfree_upng_source {
+typedef struct sgfx_upng_source {
   const unsigned char *buffer;
   unsigned long size;
   char owning;
-} ibutterfree_upng_source;
+} sgfx_upng_source;
 
-struct ibutterfree_upng_t {
+struct sgfx_upng_t {
   unsigned width;
   unsigned height;
 
-  ibutterfree_upng_color color_type;
+  sgfx_upng_color color_type;
   unsigned color_depth;
-  ibutterfree_upng_format format;
+  sgfx_upng_format format;
 
   unsigned char *buffer;
   unsigned long size;
 
-  ibutterfree_upng_error error;
+  sgfx_upng_error error;
   unsigned error_line;
 
-  ibutterfree_upng_state state;
-  ibutterfree_upng_source source;
+  sgfx_upng_state state;
+  sgfx_upng_source source;
 };
 
 typedef struct huffman_tree {
@@ -221,7 +221,7 @@ static void huffman_tree_init(huffman_tree *tree, unsigned *buffer,
 /*given the code lengths (as stored in the PNG file), generate the tree as
  * defined by Deflate. maxbitlen is the maximum bits that a code in the tree can
  * have. return value is error.*/
-static void huffman_tree_create_lengths(ibutterfree_upng_t *ibutterfree_upng,
+static void huffman_tree_create_lengths(sgfx_upng_t *sgfx_upng,
                                         huffman_tree *tree,
                                         const unsigned *bitlen) {
   unsigned tree1d[MAX_SYMBOLS];
@@ -271,7 +271,7 @@ static void huffman_tree_create_lengths(ibutterfree_upng_t *ibutterfree_upng,
           (unsigned char)((tree1d[n] >> (bitlen[n] - i - 1)) & 1);
       /* check if oversubscribed */
       if (treepos > tree->numcodes - 2) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         return;
       }
 
@@ -300,7 +300,7 @@ static void huffman_tree_create_lengths(ibutterfree_upng_t *ibutterfree_upng,
   }
 }
 
-static unsigned huffman_decode_symbol(ibutterfree_upng_t *ibutterfree_upng,
+static unsigned huffman_decode_symbol(sgfx_upng_t *sgfx_upng,
                                       const unsigned char *in,
                                       unsigned long *bp,
                                       const huffman_tree *codetree,
@@ -310,7 +310,7 @@ static unsigned huffman_decode_symbol(ibutterfree_upng_t *ibutterfree_upng,
   for (;;) {
     /* error: end of input memory reached without endcode */
     if (((*bp) & 0x07) == 0 && ((*bp) >> 3) > inlength) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
       return 0;
     }
 
@@ -323,7 +323,7 @@ static unsigned huffman_decode_symbol(ibutterfree_upng_t *ibutterfree_upng,
 
     treepos = ct - codetree->numcodes;
     if (treepos >= codetree->numcodes) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
       return 0;
     }
   }
@@ -331,7 +331,7 @@ static unsigned huffman_decode_symbol(ibutterfree_upng_t *ibutterfree_upng,
 
 /* get the tree of a deflated block with dynamic tree, the tree itself is also
  * Huffman compressed with a known tree*/
-static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
+static void get_tree_inflate_dynamic(sgfx_upng_t *sgfx_upng,
                                      huffman_tree *codetree,
                                      huffman_tree *codetreeD,
                                      huffman_tree *codelengthcodetree,
@@ -346,7 +346,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
    * tree will be generated */
   /*C-code note: use no "return" between ctor and dtor of an uivector! */
   if ((*bp) >> 3 >= inlength - 2) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     return;
   }
 
@@ -373,11 +373,10 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
     }
   }
 
-  huffman_tree_create_lengths(ibutterfree_upng, codelengthcodetree,
-                              codelengthcode);
+  huffman_tree_create_lengths(sgfx_upng, codelengthcodetree, codelengthcode);
 
   /* bail now if we encountered an error earlier */
-  if (ibutterfree_upng->error != UPNG_EOK) {
+  if (sgfx_upng->error != UPNG_EOK) {
     return;
   }
 
@@ -387,9 +386,9 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
   while (i < hlit + hdist) { /*i is the current symbol we're reading in the part
                                 that contains the code lengths of lit/len codes
                                 and dist codes */
-    unsigned code = huffman_decode_symbol(ibutterfree_upng, in, bp,
-                                          codelengthcodetree, inlength);
-    if (ibutterfree_upng->error != UPNG_EOK) {
+    unsigned code =
+        huffman_decode_symbol(sgfx_upng, in, bp, codelengthcodetree, inlength);
+    if (sgfx_upng->error != UPNG_EOK) {
       break;
     }
 
@@ -406,7 +405,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
       unsigned value; /*set value to the previous code */
 
       if ((*bp) >> 3 >= inlength) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         break;
       }
       /*error, bit pointer jumps past memory */
@@ -422,7 +421,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
       for (n = 0; n < replength; n++) {
         /* i is larger than the amount of codes */
         if (i >= hlit + hdist) {
-          SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+          SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
           break;
         }
 
@@ -436,7 +435,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
     } else if (code == 17) {  /*repeat "0" 3-10 times */
       unsigned replength = 3; /*read in the bits that indicate repeat length */
       if ((*bp) >> 3 >= inlength) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         break;
       }
 
@@ -447,7 +446,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
       for (n = 0; n < replength; n++) {
         /* error: i is larger than the amount of codes */
         if (i >= hlit + hdist) {
-          SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+          SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
           break;
         }
 
@@ -462,7 +461,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
       unsigned replength = 11; /*read in the bits that indicate repeat length */
       /* error, bit pointer jumps past memory */
       if ((*bp) >> 3 >= inlength) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         break;
       }
 
@@ -472,7 +471,7 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
       for (n = 0; n < replength; n++) {
         /* i is larger than the amount of codes */
         if (i >= hlit + hdist) {
-          SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+          SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
           break;
         }
         if (i < hlit)
@@ -483,32 +482,31 @@ static void get_tree_inflate_dynamic(ibutterfree_upng_t *ibutterfree_upng,
       }
     } else {
       /* somehow an unexisting code appeared. This can never happen. */
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
       break;
     }
   }
 
-  if (ibutterfree_upng->error == UPNG_EOK && bitlen[256] == 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+  if (sgfx_upng->error == UPNG_EOK && bitlen[256] == 0) {
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
   }
 
   /*the length of the end code 256 must be larger than 0 */
   /*now we've finally got hlit and hdist, so generate the code trees, and the
    * function is done */
-  if (ibutterfree_upng->error == UPNG_EOK) {
-    huffman_tree_create_lengths(ibutterfree_upng, codetree, bitlen);
+  if (sgfx_upng->error == UPNG_EOK) {
+    huffman_tree_create_lengths(sgfx_upng, codetree, bitlen);
   }
-  if (ibutterfree_upng->error == UPNG_EOK) {
-    huffman_tree_create_lengths(ibutterfree_upng, codetreeD, bitlenD);
+  if (sgfx_upng->error == UPNG_EOK) {
+    huffman_tree_create_lengths(sgfx_upng, codetreeD, bitlenD);
   }
 }
 
 /*inflate a block with dynamic of fixed Huffman tree*/
-static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
-                            unsigned char *out, unsigned long outsize,
-                            const unsigned char *in, unsigned long *bp,
-                            unsigned long *pos, unsigned long inlength,
-                            unsigned btype) {
+static void inflate_huffman(sgfx_upng_t *sgfx_upng, unsigned char *out,
+                            unsigned long outsize, const unsigned char *in,
+                            unsigned long *bp, unsigned long *pos,
+                            unsigned long inlength, unsigned btype) {
   unsigned codetree_buffer[DEFLATE_CODE_BUFFER_SIZE];
   unsigned codetreeD_buffer[DISTANCE_BUFFER_SIZE];
   unsigned done = 0;
@@ -533,14 +531,14 @@ static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
                       DISTANCE_BITLEN);
     huffman_tree_init(&codelengthcodetree, codelengthcodetree_buffer,
                       NUM_CODE_LENGTH_CODES, CODE_LENGTH_BITLEN);
-    get_tree_inflate_dynamic(ibutterfree_upng, &codetree, &codetreeD,
+    get_tree_inflate_dynamic(sgfx_upng, &codetree, &codetreeD,
                              &codelengthcodetree, in, bp, inlength);
   }
 
   while (done == 0) {
     unsigned code =
-        huffman_decode_symbol(ibutterfree_upng, in, bp, &codetree, inlength);
-    if (ibutterfree_upng->error != UPNG_EOK) {
+        huffman_decode_symbol(sgfx_upng, in, bp, &codetree, inlength);
+    if (sgfx_upng->error != UPNG_EOK) {
       return;
     }
 
@@ -550,7 +548,7 @@ static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
     } else if (code <= 255) {
       /* literal symbol */
       if ((*pos) >= outsize) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         return;
       }
 
@@ -568,21 +566,20 @@ static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
 
       /* error, bit pointer will jump past memory */
       if (((*bp) >> 3) >= inlength) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         return;
       }
       length += read_bits(bp, in, numextrabits);
 
       /*part 3: get distance code */
-      codeD =
-          huffman_decode_symbol(ibutterfree_upng, in, bp, &codetreeD, inlength);
-      if (ibutterfree_upng->error != UPNG_EOK) {
+      codeD = huffman_decode_symbol(sgfx_upng, in, bp, &codetreeD, inlength);
+      if (sgfx_upng->error != UPNG_EOK) {
         return;
       }
 
       /* invalid distance code (30-31 are never used) */
       if (codeD > 29) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         return;
       }
 
@@ -593,7 +590,7 @@ static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
 
       /* error, bit pointer will jump past memory */
       if (((*bp) >> 3) >= inlength) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         return;
       }
 
@@ -604,7 +601,7 @@ static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
       backward = start - distance;
 
       if ((*pos) + length >= outsize) {
-        SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+        SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
         return;
       }
 
@@ -620,10 +617,10 @@ static void inflate_huffman(ibutterfree_upng_t *ibutterfree_upng,
   }
 }
 
-static void inflate_uncompressed(ibutterfree_upng_t *ibutterfree_upng,
-                                 unsigned char *out, unsigned long outsize,
-                                 const unsigned char *in, unsigned long *bp,
-                                 unsigned long *pos, unsigned long inlength) {
+static void inflate_uncompressed(sgfx_upng_t *sgfx_upng, unsigned char *out,
+                                 unsigned long outsize, const unsigned char *in,
+                                 unsigned long *bp, unsigned long *pos,
+                                 unsigned long inlength) {
   unsigned long p;
   unsigned len, nlen, n;
 
@@ -635,7 +632,7 @@ static void inflate_uncompressed(ibutterfree_upng_t *ibutterfree_upng,
 
   /* read len (2 bytes) and nlen (2 bytes) */
   if (p >= inlength - 4) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     return;
   }
 
@@ -646,18 +643,18 @@ static void inflate_uncompressed(ibutterfree_upng_t *ibutterfree_upng,
 
   /* check if 16-bit nlen is really the one's complement of len */
   if (len + nlen != 65535) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     return;
   }
 
   if ((*pos) + len >= outsize) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     return;
   }
 
   /* read the literal data: len bytes are now stored in the out buffer */
   if (p + len > inlength) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     return;
   }
 
@@ -669,8 +666,8 @@ static void inflate_uncompressed(ibutterfree_upng_t *ibutterfree_upng,
 }
 
 /*inflate the deflated data (cfr. deflate spec); return value is the error*/
-static ibutterfree_upng_error
-uz_inflate_data(ibutterfree_upng_t *ibutterfree_upng, unsigned char *out,
+static sgfx_upng_error
+uz_inflate_data(sgfx_upng_t *sgfx_upng, unsigned char *out,
                 unsigned long outsize, const unsigned char *in,
                 unsigned long insize, unsigned long inpos) {
   unsigned long bp =
@@ -685,8 +682,8 @@ uz_inflate_data(ibutterfree_upng_t *ibutterfree_upng, unsigned char *out,
 
     /* ensure next bit doesn't point past the end of the buffer */
     if ((bp >> 3) >= insize) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-      return ibutterfree_upng->error;
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+      return sgfx_upng->error;
     }
 
     /* read block control bits */
@@ -695,61 +692,60 @@ uz_inflate_data(ibutterfree_upng_t *ibutterfree_upng, unsigned char *out,
 
     /* process control type appropriateyly */
     if (btype == 3) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-      return ibutterfree_upng->error;
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+      return sgfx_upng->error;
     } else if (btype == 0) {
-      inflate_uncompressed(ibutterfree_upng, out, outsize, &in[inpos], &bp,
-                           &pos, insize); /*no compression */
+      inflate_uncompressed(sgfx_upng, out, outsize, &in[inpos], &bp, &pos,
+                           insize); /*no compression */
     } else {
-      inflate_huffman(ibutterfree_upng, out, outsize, &in[inpos], &bp, &pos,
-                      insize, btype); /*compression, btype 01 or 10 */
+      inflate_huffman(sgfx_upng, out, outsize, &in[inpos], &bp, &pos, insize,
+                      btype); /*compression, btype 01 or 10 */
     }
 
     /* stop if an error has occured */
-    if (ibutterfree_upng->error != UPNG_EOK) {
-      return ibutterfree_upng->error;
+    if (sgfx_upng->error != UPNG_EOK) {
+      return sgfx_upng->error;
     }
   }
 
-  return ibutterfree_upng->error;
+  return sgfx_upng->error;
 }
 
-static ibutterfree_upng_error uz_inflate(ibutterfree_upng_t *ibutterfree_upng,
-                                         unsigned char *out,
-                                         unsigned long outsize,
-                                         const unsigned char *in,
-                                         unsigned long insize) {
+static sgfx_upng_error uz_inflate(sgfx_upng_t *sgfx_upng, unsigned char *out,
+                                  unsigned long outsize,
+                                  const unsigned char *in,
+                                  unsigned long insize) {
   /* we require two bytes for the zlib data header */
   if (insize < 2) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /* 256 * in[0] + in[1] must be a multiple of 31, the FCHECK value is supposed
    * to be made that way */
   if ((in[0] * 256 + in[1]) % 31 != 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /*error: only compression method 8: inflate with sliding window of 32k is
    * supported by the PNG spec */
   if ((in[0] & 15) != 8 || ((in[0] >> 4) & 15) > 7) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /* the specification of PNG says about the zlib stream: "The additional flags
    * shall not specify a preset dictionary." */
   if (((in[1] >> 5) & 1) != 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /* create output buffer */
-  uz_inflate_data(ibutterfree_upng, out, outsize, in, insize, 2);
+  uz_inflate_data(sgfx_upng, out, outsize, in, insize, 2);
 
-  return ibutterfree_upng->error;
+  return sgfx_upng->error;
 }
 
 /*Paeth predicter, used by PNG filter type 4*/
@@ -767,8 +763,7 @@ static int paeth_predictor(int a, int b, int c) {
     return c;
 }
 
-static void unfilter_scanline(ibutterfree_upng_t *ibutterfree_upng,
-                              unsigned char *recon,
+static void unfilter_scanline(sgfx_upng_t *sgfx_upng, unsigned char *recon,
                               const unsigned char *scanline,
                               const unsigned char *precon,
                               unsigned long bytewidth, unsigned char filterType,
@@ -835,12 +830,12 @@ static void unfilter_scanline(ibutterfree_upng_t *ibutterfree_upng,
     }
     break;
   default:
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     break;
   }
 }
 
-static void unfilter(ibutterfree_upng_t *ibutterfree_upng, unsigned char *out,
+static void unfilter(sgfx_upng_t *sgfx_upng, unsigned char *out,
                      const unsigned char *in, unsigned w, unsigned h,
                      unsigned bpp) {
   /*
@@ -866,9 +861,9 @@ static void unfilter(ibutterfree_upng_t *ibutterfree_upng, unsigned char *out,
         (1 + linebytes) * y; /*the extra filterbyte added to each row */
     unsigned char filterType = in[inindex];
 
-    unfilter_scanline(ibutterfree_upng, &out[outindex], &in[inindex + 1],
-                      prevline, bytewidth, filterType, linebytes);
-    if (ibutterfree_upng->error != UPNG_EOK) {
+    unfilter_scanline(sgfx_upng, &out[outindex], &in[inindex + 1], prevline,
+                      bytewidth, filterType, linebytes);
+    if (sgfx_upng->error != UPNG_EOK) {
       return;
     }
 
@@ -912,36 +907,35 @@ static void remove_padding_bits(unsigned char *out, const unsigned char *in,
 
 /*out must be buffer big enough to contain full image, and in must contain the
  * full decompressed data from the IDAT chunks*/
-static void post_process_scanlines(ibutterfree_upng_t *ibutterfree_upng,
-                                   unsigned char *out, unsigned char *in,
-                                   const ibutterfree_upng_t *info_png) {
-  unsigned bpp = ibutterfree_upng_get_bpp(info_png);
+static void post_process_scanlines(sgfx_upng_t *sgfx_upng, unsigned char *out,
+                                   unsigned char *in,
+                                   const sgfx_upng_t *info_png) {
+  unsigned bpp = sgfx_upng_get_bpp(info_png);
   unsigned w = info_png->width;
   unsigned h = info_png->height;
 
   if (bpp == 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
     return;
   }
 
   if (bpp < 8 && w * bpp != ((w * bpp + 7) / 8) * 8) {
-    unfilter(ibutterfree_upng, in, in, w, h, bpp);
-    if (ibutterfree_upng->error != UPNG_EOK) {
+    unfilter(sgfx_upng, in, in, w, h, bpp);
+    if (sgfx_upng->error != UPNG_EOK) {
       return;
     }
     remove_padding_bits(out, in, w * bpp, ((w * bpp + 7) / 8) * 8, h);
   } else {
-    unfilter(ibutterfree_upng, out, in, w, h,
+    unfilter(sgfx_upng, out, in, w, h,
              bpp); /*we can immediatly filter into the out buffer, no other
                       steps needed */
   }
 }
 
-static ibutterfree_upng_format
-determine_format(ibutterfree_upng_t *ibutterfree_upng) {
-  switch (ibutterfree_upng->color_type) {
+static sgfx_upng_format determine_format(sgfx_upng_t *sgfx_upng) {
+  switch (sgfx_upng->color_type) {
   case UPNG_LUM:
-    switch (ibutterfree_upng->color_depth) {
+    switch (sgfx_upng->color_depth) {
     case 1:
       return UPNG_LUMINANCE1;
     case 2:
@@ -954,7 +948,7 @@ determine_format(ibutterfree_upng_t *ibutterfree_upng) {
       return UPNG_BADFORMAT;
     }
   case UPNG_RGB:
-    switch (ibutterfree_upng->color_depth) {
+    switch (sgfx_upng->color_depth) {
     case 8:
       return UPNG_RGB8;
     case 16:
@@ -963,7 +957,7 @@ determine_format(ibutterfree_upng_t *ibutterfree_upng) {
       return UPNG_BADFORMAT;
     }
   case UPNG_LUMA:
-    switch (ibutterfree_upng->color_depth) {
+    switch (sgfx_upng->color_depth) {
     case 1:
       return UPNG_LUMINANCE_ALPHA1;
     case 2:
@@ -976,7 +970,7 @@ determine_format(ibutterfree_upng_t *ibutterfree_upng) {
       return UPNG_BADFORMAT;
     }
   case UPNG_RGBA:
-    switch (ibutterfree_upng->color_depth) {
+    switch (sgfx_upng->color_depth) {
     case 8:
       return UPNG_RGBA8;
     case 16:
@@ -989,330 +983,316 @@ determine_format(ibutterfree_upng_t *ibutterfree_upng) {
   }
 }
 
-static void ibutterfree_upng_free_source(ibutterfree_upng_t *ibutterfree_upng) {
-  if (ibutterfree_upng->source.owning != 0) {
-    free((void *)ibutterfree_upng->source.buffer);
+static void sgfx_upng_free_source(sgfx_upng_t *sgfx_upng) {
+  if (sgfx_upng->source.owning != 0) {
+    free((void *)sgfx_upng->source.buffer);
   }
 
-  ibutterfree_upng->source.buffer = NULL;
-  ibutterfree_upng->source.size = 0;
-  ibutterfree_upng->source.owning = 0;
+  sgfx_upng->source.buffer = NULL;
+  sgfx_upng->source.size = 0;
+  sgfx_upng->source.owning = 0;
 }
 
 /*read the information from the header and store it in the
- * ibutterfree_upng_Info. return value is error*/
-ibutterfree_upng_error
-ibutterfree_upng_header(ibutterfree_upng_t *ibutterfree_upng) {
+ * sgfx_upng_Info. return value is error*/
+sgfx_upng_error sgfx_upng_header(sgfx_upng_t *sgfx_upng) {
   /* if we have an error state, bail now */
-  if (ibutterfree_upng->error != UPNG_EOK) {
-    return ibutterfree_upng->error;
+  if (sgfx_upng->error != UPNG_EOK) {
+    return sgfx_upng->error;
   }
 
   /* if the state is not NEW (meaning we are ready to parse the header), stop
    * now */
-  if (ibutterfree_upng->state != UPNG_NEW) {
-    return ibutterfree_upng->error;
+  if (sgfx_upng->state != UPNG_NEW) {
+    return sgfx_upng->error;
   }
 
   /* minimum length of a valid PNG file is 29 bytes
    * FIXME: verify this against the specification, or
    * better against the actual code below */
-  if (ibutterfree_upng->source.size < 29) {
-    SET_ERROR(ibutterfree_upng, UPNG_ENOTPNG);
-    return ibutterfree_upng->error;
+  if (sgfx_upng->source.size < 29) {
+    SET_ERROR(sgfx_upng, UPNG_ENOTPNG);
+    return sgfx_upng->error;
   }
 
   /* check that PNG header matches expected value */
-  if (ibutterfree_upng->source.buffer[0] != 137 ||
-      ibutterfree_upng->source.buffer[1] != 80 ||
-      ibutterfree_upng->source.buffer[2] != 78 ||
-      ibutterfree_upng->source.buffer[3] != 71 ||
-      ibutterfree_upng->source.buffer[4] != 13 ||
-      ibutterfree_upng->source.buffer[5] != 10 ||
-      ibutterfree_upng->source.buffer[6] != 26 ||
-      ibutterfree_upng->source.buffer[7] != 10) {
-    SET_ERROR(ibutterfree_upng, UPNG_ENOTPNG);
-    return ibutterfree_upng->error;
+  if (sgfx_upng->source.buffer[0] != 137 || sgfx_upng->source.buffer[1] != 80 ||
+      sgfx_upng->source.buffer[2] != 78 || sgfx_upng->source.buffer[3] != 71 ||
+      sgfx_upng->source.buffer[4] != 13 || sgfx_upng->source.buffer[5] != 10 ||
+      sgfx_upng->source.buffer[6] != 26 || sgfx_upng->source.buffer[7] != 10) {
+    SET_ERROR(sgfx_upng, UPNG_ENOTPNG);
+    return sgfx_upng->error;
   }
 
   /* check that the first chunk is the IHDR chunk */
-  if (MAKE_DWORD_PTR(ibutterfree_upng->source.buffer + 12) != CHUNK_IHDR) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+  if (MAKE_DWORD_PTR(sgfx_upng->source.buffer + 12) != CHUNK_IHDR) {
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /* read the values given in the header */
-  ibutterfree_upng->width =
-      MAKE_DWORD_PTR(ibutterfree_upng->source.buffer + 16);
-  ibutterfree_upng->height =
-      MAKE_DWORD_PTR(ibutterfree_upng->source.buffer + 20);
-  ibutterfree_upng->color_depth = ibutterfree_upng->source.buffer[24];
-  ibutterfree_upng->color_type =
-      (ibutterfree_upng_color)ibutterfree_upng->source.buffer[25];
+  sgfx_upng->width = MAKE_DWORD_PTR(sgfx_upng->source.buffer + 16);
+  sgfx_upng->height = MAKE_DWORD_PTR(sgfx_upng->source.buffer + 20);
+  sgfx_upng->color_depth = sgfx_upng->source.buffer[24];
+  sgfx_upng->color_type = (sgfx_upng_color)sgfx_upng->source.buffer[25];
 
   /* determine our color format */
-  ibutterfree_upng->format = determine_format(ibutterfree_upng);
-  if (ibutterfree_upng->format == UPNG_BADFORMAT) {
-    SET_ERROR(ibutterfree_upng, UPNG_EUNFORMAT);
-    return ibutterfree_upng->error;
+  sgfx_upng->format = determine_format(sgfx_upng);
+  if (sgfx_upng->format == UPNG_BADFORMAT) {
+    SET_ERROR(sgfx_upng, UPNG_EUNFORMAT);
+    return sgfx_upng->error;
   }
 
   /* check that the compression method (byte 27) is 0 (only allowed value in
    * spec) */
-  if (ibutterfree_upng->source.buffer[26] != 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+  if (sgfx_upng->source.buffer[26] != 0) {
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /* check that the compression method (byte 27) is 0 (only allowed value in
    * spec) */
-  if (ibutterfree_upng->source.buffer[27] != 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-    return ibutterfree_upng->error;
+  if (sgfx_upng->source.buffer[27] != 0) {
+    SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+    return sgfx_upng->error;
   }
 
   /* check that the compression method (byte 27) is 0 (spec allows 1, but uPNG
    * does not support it) */
-  if (ibutterfree_upng->source.buffer[28] != 0) {
-    SET_ERROR(ibutterfree_upng, UPNG_EUNINTERLACED);
-    return ibutterfree_upng->error;
+  if (sgfx_upng->source.buffer[28] != 0) {
+    SET_ERROR(sgfx_upng, UPNG_EUNINTERLACED);
+    return sgfx_upng->error;
   }
 
-  ibutterfree_upng->state = UPNG_HEADER;
-  return ibutterfree_upng->error;
+  sgfx_upng->state = UPNG_HEADER;
+  return sgfx_upng->error;
 }
 
 /*read a PNG, the result will be in the same color type as the PNG (hence
  * "generic")*/
-ibutterfree_upng_error
-ibutterfree_upng_decode(ibutterfree_upng_t *ibutterfree_upng) {
+sgfx_upng_error sgfx_upng_decode(sgfx_upng_t *sgfx_upng) {
   const unsigned char *chunk;
   unsigned char *compressed;
   unsigned char *inflated;
   unsigned long compressed_size = 0, compressed_index = 0;
   unsigned long inflated_size;
-  ibutterfree_upng_error error;
+  sgfx_upng_error error;
 
   /* if we have an error state, bail now */
-  if (ibutterfree_upng->error != UPNG_EOK) {
-    return ibutterfree_upng->error;
+  if (sgfx_upng->error != UPNG_EOK) {
+    return sgfx_upng->error;
   }
 
   /* parse the main header, if necessary */
-  ibutterfree_upng_header(ibutterfree_upng);
-  if (ibutterfree_upng->error != UPNG_EOK) {
-    return ibutterfree_upng->error;
+  sgfx_upng_header(sgfx_upng);
+  if (sgfx_upng->error != UPNG_EOK) {
+    return sgfx_upng->error;
   }
 
   /* if the state is not HEADER (meaning we are ready to decode the image), stop
    * now */
-  if (ibutterfree_upng->state != UPNG_HEADER) {
-    return ibutterfree_upng->error;
+  if (sgfx_upng->state != UPNG_HEADER) {
+    return sgfx_upng->error;
   }
 
   /* release old result, if any */
-  if (ibutterfree_upng->buffer != 0) {
-    free(ibutterfree_upng->buffer);
-    ibutterfree_upng->buffer = 0;
-    ibutterfree_upng->size = 0;
+  if (sgfx_upng->buffer != 0) {
+    free(sgfx_upng->buffer);
+    sgfx_upng->buffer = 0;
+    sgfx_upng->size = 0;
   }
 
   /* first byte of the first chunk after the header */
-  chunk = ibutterfree_upng->source.buffer + 33;
+  chunk = sgfx_upng->source.buffer + 33;
 
   /* scan through the chunks, finding the size of all IDAT chunks, and also
    * verify general well-formed-ness */
-  while (chunk <
-         ibutterfree_upng->source.buffer + ibutterfree_upng->source.size) {
+  while (chunk < sgfx_upng->source.buffer + sgfx_upng->source.size) {
     unsigned long length;
     const unsigned char *data = NULL; /*the data in the chunk */
 
     /* make sure chunk header is not larger than the total compressed */
-    if ((unsigned long)(chunk - ibutterfree_upng->source.buffer + 12) >
-        ibutterfree_upng->source.size) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-      return ibutterfree_upng->error;
+    if ((unsigned long)(chunk - sgfx_upng->source.buffer + 12) >
+        sgfx_upng->source.size) {
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+      return sgfx_upng->error;
     }
 
     /* get length; sanity check it */
-    length = ibutterfree_upng_chunk_length(chunk);
+    length = sgfx_upng_chunk_length(chunk);
     if (length > INT_MAX) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-      return ibutterfree_upng->error;
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+      return sgfx_upng->error;
     }
 
     /* make sure chunk header+paylaod is not larger than the total compressed */
-    if ((unsigned long)(chunk - ibutterfree_upng->source.buffer + length + 12) >
-        ibutterfree_upng->source.size) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-      return ibutterfree_upng->error;
+    if ((unsigned long)(chunk - sgfx_upng->source.buffer + length + 12) >
+        sgfx_upng->source.size) {
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+      return sgfx_upng->error;
     }
 
     /* get pointer to payload */
     data = chunk + 8;
     if (data == NULL) {
-      SET_ERROR(ibutterfree_upng, UPNG_EMALFORMED);
-      return ibutterfree_upng->error;
+      SET_ERROR(sgfx_upng, UPNG_EMALFORMED);
+      return sgfx_upng->error;
     }
     /* parse chunks */
-    if (ibutterfree_upng_chunk_type(chunk) == CHUNK_IDAT) {
+    if (sgfx_upng_chunk_type(chunk) == CHUNK_IDAT) {
       compressed_size += length;
-    } else if (ibutterfree_upng_chunk_type(chunk) == CHUNK_IEND) {
+    } else if (sgfx_upng_chunk_type(chunk) == CHUNK_IEND) {
       break;
-    } else if (ibutterfree_upng_chunk_critical(chunk)) {
-      SET_ERROR(ibutterfree_upng, UPNG_EUNSUPPORTED);
-      return ibutterfree_upng->error;
+    } else if (sgfx_upng_chunk_critical(chunk)) {
+      SET_ERROR(sgfx_upng, UPNG_EUNSUPPORTED);
+      return sgfx_upng->error;
     }
 
-    chunk += ibutterfree_upng_chunk_length(chunk) + 12;
+    chunk += sgfx_upng_chunk_length(chunk) + 12;
   }
 
   /* allocate enough space for the (compressed and filtered) image data */
   compressed = (unsigned char *)malloc(compressed_size);
   if (compressed == NULL) {
-    SET_ERROR(ibutterfree_upng, UPNG_ENOMEM);
-    return ibutterfree_upng->error;
+    SET_ERROR(sgfx_upng, UPNG_ENOMEM);
+    return sgfx_upng->error;
   }
 
   /* scan through the chunks again, this time copying the values into
    * our compressed buffer.  there's no reason to validate anything a second
    * time. */
-  chunk = ibutterfree_upng->source.buffer + 33;
-  while (chunk <
-         ibutterfree_upng->source.buffer + ibutterfree_upng->source.size) {
+  chunk = sgfx_upng->source.buffer + 33;
+  while (chunk < sgfx_upng->source.buffer + sgfx_upng->source.size) {
     unsigned long length;
     const unsigned char *data; /*the data in the chunk */
 
-    length = ibutterfree_upng_chunk_length(chunk);
+    length = sgfx_upng_chunk_length(chunk);
     data = chunk + 8;
 
     /* parse chunks */
-    if (ibutterfree_upng_chunk_type(chunk) == CHUNK_IDAT) {
+    if (sgfx_upng_chunk_type(chunk) == CHUNK_IDAT) {
       memcpy(compressed + compressed_index, data, length);
       compressed_index += length;
-    } else if (ibutterfree_upng_chunk_type(chunk) == CHUNK_IEND) {
+    } else if (sgfx_upng_chunk_type(chunk) == CHUNK_IEND) {
       break;
     }
 
-    chunk += ibutterfree_upng_chunk_length(chunk) + 12;
+    chunk += sgfx_upng_chunk_length(chunk) + 12;
   }
 
   /* allocate space to store inflated (but still filtered) data */
-  inflated_size =
-      ((ibutterfree_upng->width *
-        (ibutterfree_upng->height * ibutterfree_upng_get_bpp(ibutterfree_upng) +
-         7)) /
-       8) +
-      ibutterfree_upng->height;
+  inflated_size = ((sgfx_upng->width *
+                    (sgfx_upng->height * sgfx_upng_get_bpp(sgfx_upng) + 7)) /
+                   8) +
+                  sgfx_upng->height;
   inflated = (unsigned char *)malloc(inflated_size);
   if (inflated == NULL) {
     free(compressed);
-    SET_ERROR(ibutterfree_upng, UPNG_ENOMEM);
-    return ibutterfree_upng->error;
+    SET_ERROR(sgfx_upng, UPNG_ENOMEM);
+    return sgfx_upng->error;
   }
 
   /* decompress image data */
-  error = uz_inflate(ibutterfree_upng, inflated, inflated_size, compressed,
+  error = uz_inflate(sgfx_upng, inflated, inflated_size, compressed,
                      compressed_size);
   if (error != UPNG_EOK) {
     free(compressed);
     free(inflated);
-    return ibutterfree_upng->error;
+    return sgfx_upng->error;
   }
 
   /* free the compressed compressed data */
   free(compressed);
 
   /* allocate final image buffer */
-  ibutterfree_upng->size = (ibutterfree_upng->height * ibutterfree_upng->width *
-                                ibutterfree_upng_get_bpp(ibutterfree_upng) +
-                            7) /
-                           8;
-  ibutterfree_upng->buffer = (unsigned char *)malloc(ibutterfree_upng->size);
-  if (ibutterfree_upng->buffer == NULL) {
+  sgfx_upng->size =
+      (sgfx_upng->height * sgfx_upng->width * sgfx_upng_get_bpp(sgfx_upng) +
+       7) /
+      8;
+  sgfx_upng->buffer = (unsigned char *)malloc(sgfx_upng->size);
+  if (sgfx_upng->buffer == NULL) {
     free(inflated);
-    ibutterfree_upng->size = 0;
-    SET_ERROR(ibutterfree_upng, UPNG_ENOMEM);
-    return ibutterfree_upng->error;
+    sgfx_upng->size = 0;
+    SET_ERROR(sgfx_upng, UPNG_ENOMEM);
+    return sgfx_upng->error;
   }
 
   /* unfilter scanlines */
-  post_process_scanlines(ibutterfree_upng, ibutterfree_upng->buffer, inflated,
-                         ibutterfree_upng);
+  post_process_scanlines(sgfx_upng, sgfx_upng->buffer, inflated, sgfx_upng);
   free(inflated);
 
-  if (ibutterfree_upng->error != UPNG_EOK) {
-    free(ibutterfree_upng->buffer);
-    ibutterfree_upng->buffer = NULL;
-    ibutterfree_upng->size = 0;
+  if (sgfx_upng->error != UPNG_EOK) {
+    free(sgfx_upng->buffer);
+    sgfx_upng->buffer = NULL;
+    sgfx_upng->size = 0;
   } else {
-    ibutterfree_upng->state = UPNG_DECODED;
+    sgfx_upng->state = UPNG_DECODED;
   }
 
   /* we are done with our input buffer; free it if we own it */
-  ibutterfree_upng_free_source(ibutterfree_upng);
+  sgfx_upng_free_source(sgfx_upng);
 
-  return ibutterfree_upng->error;
+  return sgfx_upng->error;
 }
 
-static ibutterfree_upng_t *ibutterfree_upng_new(void) {
-  ibutterfree_upng_t *ibutterfree_upng;
+static sgfx_upng_t *sgfx_upng_new(void) {
+  sgfx_upng_t *sgfx_upng;
 
-  ibutterfree_upng = (ibutterfree_upng_t *)malloc(sizeof(ibutterfree_upng_t));
-  if (ibutterfree_upng == NULL) {
+  sgfx_upng = (sgfx_upng_t *)malloc(sizeof(sgfx_upng_t));
+  if (sgfx_upng == NULL) {
     return NULL;
   }
 
-  ibutterfree_upng->buffer = NULL;
-  ibutterfree_upng->size = 0;
+  sgfx_upng->buffer = NULL;
+  sgfx_upng->size = 0;
 
-  ibutterfree_upng->width = ibutterfree_upng->height = 0;
+  sgfx_upng->width = sgfx_upng->height = 0;
 
-  ibutterfree_upng->color_type = UPNG_RGBA;
-  ibutterfree_upng->color_depth = 8;
-  ibutterfree_upng->format = UPNG_RGBA8;
+  sgfx_upng->color_type = UPNG_RGBA;
+  sgfx_upng->color_depth = 8;
+  sgfx_upng->format = UPNG_RGBA8;
 
-  ibutterfree_upng->state = UPNG_NEW;
+  sgfx_upng->state = UPNG_NEW;
 
-  ibutterfree_upng->error = UPNG_EOK;
-  ibutterfree_upng->error_line = 0;
+  sgfx_upng->error = UPNG_EOK;
+  sgfx_upng->error_line = 0;
 
-  ibutterfree_upng->source.buffer = NULL;
-  ibutterfree_upng->source.size = 0;
-  ibutterfree_upng->source.owning = 0;
+  sgfx_upng->source.buffer = NULL;
+  sgfx_upng->source.size = 0;
+  sgfx_upng->source.owning = 0;
 
-  return ibutterfree_upng;
+  return sgfx_upng;
 }
 
-ibutterfree_upng_t *ibutterfree_upng_new_from_bytes(const unsigned char *buffer,
-                                                    unsigned long size) {
-  ibutterfree_upng_t *ibutterfree_upng = ibutterfree_upng_new();
-  if (ibutterfree_upng == NULL) {
+sgfx_upng_t *sgfx_upng_new_from_bytes(const unsigned char *buffer,
+                                      unsigned long size) {
+  sgfx_upng_t *sgfx_upng = sgfx_upng_new();
+  if (sgfx_upng == NULL) {
     return NULL;
   }
 
-  ibutterfree_upng->source.buffer = buffer;
-  ibutterfree_upng->source.size = size;
-  ibutterfree_upng->source.owning = 0;
+  sgfx_upng->source.buffer = buffer;
+  sgfx_upng->source.size = size;
+  sgfx_upng->source.owning = 0;
 
-  return ibutterfree_upng;
+  return sgfx_upng;
 }
 
-ibutterfree_upng_t *ibutterfree_upng_new_from_file(const char *filename) {
-  ibutterfree_upng_t *ibutterfree_upng;
+sgfx_upng_t *sgfx_upng_new_from_file(const char *filename) {
+  sgfx_upng_t *sgfx_upng;
   unsigned char *buffer;
   FILE *file;
   long size;
 
-  ibutterfree_upng = ibutterfree_upng_new();
-  if (ibutterfree_upng == NULL) {
+  sgfx_upng = sgfx_upng_new();
+  if (sgfx_upng == NULL) {
     return NULL;
   }
 
   file = fopen(filename, "rb");
   if (file == NULL) {
-    SET_ERROR(ibutterfree_upng, UPNG_ENOTFOUND);
-    return ibutterfree_upng;
+    SET_ERROR(sgfx_upng, UPNG_ENOTFOUND);
+    return sgfx_upng;
   }
 
   /* get filesize */
@@ -1324,66 +1304,61 @@ ibutterfree_upng_t *ibutterfree_upng_new_from_file(const char *filename) {
   buffer = (unsigned char *)malloc((unsigned long)size);
   if (buffer == NULL) {
     fclose(file);
-    SET_ERROR(ibutterfree_upng, UPNG_ENOMEM);
-    return ibutterfree_upng;
+    SET_ERROR(sgfx_upng, UPNG_ENOMEM);
+    return sgfx_upng;
   }
   size_t ret = fread(buffer, 1, (unsigned long)size, file);
   if (ret < 0) {
     fclose(file);
-    SET_ERROR(ibutterfree_upng, UPNG_ENOTFOUND);
-    return ibutterfree_upng;
+    SET_ERROR(sgfx_upng, UPNG_ENOTFOUND);
+    return sgfx_upng;
   }
   fclose(file);
 
   /* set the read buffer as our source buffer, with owning flag set */
-  ibutterfree_upng->source.buffer = buffer;
-  ibutterfree_upng->source.size = size;
-  ibutterfree_upng->source.owning = 1;
+  sgfx_upng->source.buffer = buffer;
+  sgfx_upng->source.size = size;
+  sgfx_upng->source.owning = 1;
 
-  return ibutterfree_upng;
+  return sgfx_upng;
 }
 
-void ibutterfree_upng_free(ibutterfree_upng_t *ibutterfree_upng) {
+void sgfx_upng_free(sgfx_upng_t *sgfx_upng) {
   /* deallocate image buffer */
-  if (ibutterfree_upng->buffer != NULL) {
-    free(ibutterfree_upng->buffer);
+  if (sgfx_upng->buffer != NULL) {
+    free(sgfx_upng->buffer);
   }
 
   /* deallocate source buffer, if necessary */
-  ibutterfree_upng_free_source(ibutterfree_upng);
+  sgfx_upng_free_source(sgfx_upng);
 
   /* deallocate struct itself */
-  free(ibutterfree_upng);
+  free(sgfx_upng);
 }
 
-ibutterfree_upng_error
-ibutterfree_upng_get_error(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->error;
+sgfx_upng_error sgfx_upng_get_error(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->error;
 }
 
-unsigned
-ibutterfree_upng_get_error_line(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->error_line;
+unsigned sgfx_upng_get_error_line(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->error_line;
 }
 
-unsigned
-ibutterfree_upng_get_width(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->width;
+unsigned sgfx_upng_get_width(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->width;
 }
 
-unsigned
-ibutterfree_upng_get_height(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->height;
+unsigned sgfx_upng_get_height(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->height;
 }
 
-unsigned ibutterfree_upng_get_bpp(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng_get_bitdepth(ibutterfree_upng) *
-         ibutterfree_upng_get_components(ibutterfree_upng);
+unsigned sgfx_upng_get_bpp(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng_get_bitdepth(sgfx_upng) *
+         sgfx_upng_get_components(sgfx_upng);
 }
 
-unsigned
-ibutterfree_upng_get_components(const ibutterfree_upng_t *ibutterfree_upng) {
-  switch (ibutterfree_upng->color_type) {
+unsigned sgfx_upng_get_components(const sgfx_upng_t *sgfx_upng) {
+  switch (sgfx_upng->color_type) {
   case UPNG_LUM:
     return 1;
   case UPNG_RGB:
@@ -1397,29 +1372,25 @@ ibutterfree_upng_get_components(const ibutterfree_upng_t *ibutterfree_upng) {
   }
 }
 
-unsigned
-ibutterfree_upng_get_bitdepth(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->color_depth;
+unsigned sgfx_upng_get_bitdepth(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->color_depth;
 }
 
-unsigned
-ibutterfree_upng_get_pixelsize(const ibutterfree_upng_t *ibutterfree_upng) {
-  unsigned bits = ibutterfree_upng_get_bitdepth(ibutterfree_upng) *
-                  ibutterfree_upng_get_components(ibutterfree_upng);
+unsigned sgfx_upng_get_pixelsize(const sgfx_upng_t *sgfx_upng) {
+  unsigned bits =
+      sgfx_upng_get_bitdepth(sgfx_upng) * sgfx_upng_get_components(sgfx_upng);
   bits += bits % 8;
   return bits;
 }
 
-ibutterfree_upng_format
-ibutterfree_upng_get_format(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->format;
+sgfx_upng_format sgfx_upng_get_format(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->format;
 }
 
-const unsigned char *
-ibutterfree_upng_get_buffer(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->buffer;
+const unsigned char *sgfx_upng_get_buffer(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->buffer;
 }
 
-unsigned ibutterfree_upng_get_size(const ibutterfree_upng_t *ibutterfree_upng) {
-  return ibutterfree_upng->size;
+unsigned sgfx_upng_get_size(const sgfx_upng_t *sgfx_upng) {
+  return sgfx_upng->size;
 }

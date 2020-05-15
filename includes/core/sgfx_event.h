@@ -1,7 +1,7 @@
 /****************************************************************************
  * Copyright (C) 2016 by Renan Prata                                        *
  *                                                                          *
- * This file is part of IButterFree.                                        *
+ * This file is part of SGFX.                                        *
  *                                                                          *
  * This software may be modified and distributed under the terms
  ** of the MIT license. See the LICENSE file for details.
@@ -9,19 +9,19 @@
  ****************************************************************************/
 
 /**
- * @file ibutterfree_event.h
+ * @file sgfx_event.h
  * @author Renan Prata
  * @date 26 Mar 2017
- * @brief File containing event functions of IButterFree Library.
+ * @brief File containing event functions of SGFX Library.
  *
- * File containing event functions of IButterFree Library.
- * IButterFree has the possibility to get event from touchscreen
+ * File containing event functions of SGFX Library.
+ * SGFX has the possibility to get event from touchscreen
  */
 
-#ifndef __IBUTTERFREE_EVENT_H__
-#define __IBUTTERFREE_EVENT_H__
+#ifndef __SGFX_EVENT_H__
+#define __SGFX_EVENT_H__
 
-#include "ibutterfree_surface.h"
+#include "sgfx_surface.h"
 #include <linux/input.h>
 #ifdef __POSIX__
 #include <pthread.h>
@@ -45,54 +45,53 @@ typedef struct {
   int x_abs;    /**< Absolute position in x-axys. */
   int y_abs;    /**< Absolute position in y-axys. */
   int pressure; /**< Pressure value (0 - 65555). */
-} IButterFreeTouchStruct;
+} SGFXTouchStruct;
 
 /**
  * @brief Structure of event callback.
  */
-typedef void (*event_cb_t)(IButterFreeTouchStruct bfts);
+typedef void (*event_cb_t)(SGFXTouchStruct bfts);
 
 /**
  * @brief Register event callback.
  *
  * @param surface Surface that is used to draw.
  * @param event_cb Callback registered.
- * @return IBUTTERFREE_RET is returned. In case of success, returns
- * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
+ * @return SGFX_RET is returned. In case of success, returns
+ * SGFX_OK, else, it returns SGFX_ERROR.
  */
-void ibutterfree_event_callback_register(IButterFreeSurface *surface,
-                                         event_cb_t event_cb);
+void sgfx_event_callback_register(SGFXSurface *surface, event_cb_t event_cb);
 
 typedef struct {
   int evfd;
   struct input_event ev;
   event_cb_t cb;
-} IButterFreeEventInternalStruct;
+} SGFXEventInternalStruct;
 
-IButterFreeEventInternalStruct *m_bfevs;
+SGFXEventInternalStruct *m_sgevs;
 
 /**
  * @brief Initializes event module.
  *
  * @param surface Surface that is used to draw.
- * @return IBUTTERFREE_RET is returned. In case of success, returns
- * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
+ * @return SGFX_RET is returned. In case of success, returns
+ * SGFX_OK, else, it returns SGFX_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_event_init(IButterFreeSurface *surface);
+SGFX_RET sgfx_event_init(SGFXSurface *surface);
 
 /**
  * @brief Finishes event module.
  *
  */
-void ibutterfree_event_destroy(void);
+void sgfx_event_destroy(void);
 
 /**
  * @brief  Reads event from touchscreen.
  *
- * @param bfts IButterFreeTouchStruct used to read.
- * @return IBUTTERFREE_RET is returned. In case of success, returns
- * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
+ * @param bfts SGFXTouchStruct used to read.
+ * @return SGFX_RET is returned. In case of success, returns
+ * SGFX_OK, else, it returns SGFX_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_event_read(IButterFreeTouchStruct *bfts);
+SGFX_RET sgfx_event_read(SGFXTouchStruct *bfts);
 
 #endif

@@ -1,8 +1,8 @@
-#include "ibutterfree_draw.h"
-#include "ibutterfree_definitions.h"
+#include "sgfx_draw.h"
+#include "sgfx_definitions.h"
 
-inline void __ibutterfree_swap_buffers(void) {
-  memcpy(m_bfs->fbp, m_bfs->bbp, m_bfs->screensize);
+inline void __sgfx_swap_buffers(void) {
+  memcpy(m_sgfs->fbp, m_sgfs->bbp, m_sgfs->screensize);
 }
 
 unsigned int __blendPreMulAlpha(unsigned int colora, unsigned int colorb,
@@ -21,22 +21,21 @@ unsigned int __blendAlpha(unsigned int colora, unsigned int colorb,
   return ((rb1 | rb2) & 0xFF00FF) + ((g1 | g2) & 0x00FF00);
 }
 
-IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface *surface, int px,
-                                         int py, int32_t rgba) {
-  if (m_bfs) {
-    struct fb_var_screeninfo vinfo = m_bfs->vinfo;
-    struct fb_fix_screeninfo finfo = m_bfs->finfo;
+SGFX_RET __sgfx_draw_pixel(SGFXSurface *surface, int px, int py, int32_t rgba) {
+  if (m_sgfs) {
+    struct fb_var_screeninfo vinfo = m_sgfs->vinfo;
+    struct fb_fix_screeninfo finfo = m_sgfs->finfo;
     char *bp;
     if (surface->desc->buffer == DOUBLE) {
-      bp = m_bfs->bbp;
+      bp = m_sgfs->bbp;
     } else {
-      bp = m_bfs->fbp;
+      bp = m_sgfs->fbp;
     }
 
     long location = (px + vinfo.xoffset) * (vinfo.bits_per_pixel / 8) +
                     (py + vinfo.yoffset) * finfo.line_length;
 
-    if (location < m_bfs->screensize && location >= 0) {
+    if (location < m_sgfs->screensize && location >= 0) {
       if (vinfo.bits_per_pixel == 32) {
         *(bp + location) = (rgba & 0xFF000000) >> 24;     // red
         *(bp + location + 1) = (rgba & 0x00FF0000) >> 16; // green
@@ -51,20 +50,20 @@ IBUTTERFREE_RET __ibutterfree_draw_pixel(IButterFreeSurface *surface, int px,
         *((unsigned short int *)(bp + location)) = t;
       }
     } else {
-      IBUTTERFREE_LOG_ERROR("This pixel does not exist.");
-      ibutterfree_set_message_error("This pixel does not exist.");
-      return IBUTTERFREE_ERROR;
+      SGFX_LOG_ERROR("This pixel does not exist.");
+      sgfx_set_message_error("This pixel does not exist.");
+      return SGFX_ERROR;
     }
 
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("__ibutterfree_draw_pixel has failed");
-    ibutterfree_set_message_error("__ibutterfree_draw_pixel has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("__sgfx_draw_pixel has failed");
+    sgfx_set_message_error("__sgfx_draw_pixel has failed");
+    return SGFX_ERROR;
   }
 }
-IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface *surface,
-                                                int px, int py, int32_t rgba) {
+SGFX_RET __sgfx_draw_screenbuffer(SGFXSurface *surface, int px, int py,
+                                  int32_t rgba) {
 
   if (surface) {
     rgba = (((rgba & 0x0000FF00) >> 8) << 24) +
@@ -76,7 +75,7 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface *surface,
       unsigned char alpha = rgba & 0x000000FF;
       uint32_t backpixel = surface->screenbuffer[position];
       if (alpha <= 0) {
-        return IBUTTERFREE_OK;
+        return SGFX_OK;
       }
 
       uint32_t rgba_f = rgba;
@@ -91,33 +90,32 @@ IBUTTERFREE_RET __ibutterfree_draw_screenbuffer(IButterFreeSurface *surface,
       }
 
       surface->screenbuffer[position] = rgba_f;
-      return IBUTTERFREE_OK;
+      return SGFX_OK;
     } else {
-      IBUTTERFREE_LOG_ERROR("This pixel position is invalid");
-      ibutterfree_set_message_error("This pixel position is invalid");
-      return IBUTTERFREE_ERROR;
+      SGFX_LOG_ERROR("This pixel position is invalid");
+      sgfx_set_message_error("This pixel position is invalid");
+      return SGFX_ERROR;
     }
   } else {
-    IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurface");
-    ibutterfree_set_message_error("This pixel position is invalid");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("Invalid SGFXSurface");
+    sgfx_set_message_error("This pixel position is invalid");
+    return SGFX_ERROR;
   }
 }
 
-IBUTTERFREE_RET ibutterfree_draw_point(IButterFreeSurface *surface, int px,
-                                       int py) {
+SGFX_RET sgfx_draw_point(SGFXSurface *surface, int px, int py) {
   if (surface) {
-    __ibutterfree_draw_screenbuffer(surface, px, py, surface->desc->color);
-    return IBUTTERFREE_OK;
+    __sgfx_draw_screenbuffer(surface, px, py, surface->desc->color);
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("ibutterfree_draw_point has failed");
-    ibutterfree_set_message_error("ibutterfree_draw_point has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("sgfx_draw_point has failed");
+    sgfx_set_message_error("sgfx_draw_point has failed");
+    return SGFX_ERROR;
   }
 }
 
-inline void __draw_horizontal_line(IButterFreeSurface *surface, int x0, int x1,
-                                   int y, uint32_t rgba) {
+inline void __draw_horizontal_line(SGFXSurface *surface, int x0, int x1, int y,
+                                   uint32_t rgba) {
   if (surface) {
     int i;
     if (x0 > x1) {
@@ -127,14 +125,14 @@ inline void __draw_horizontal_line(IButterFreeSurface *surface, int x0, int x1,
     }
     for (i = x0; i <= x1; i++) {
       if (i >= 0 && i <= surface->desc->width) {
-        __ibutterfree_draw_screenbuffer(surface, i, y, rgba);
+        __sgfx_draw_screenbuffer(surface, i, y, rgba);
       }
     }
   }
 }
 
-inline void __draw_vertical_line(IButterFreeSurface *surface, int x, int y0,
-                                 int y1, uint32_t rgba) {
+inline void __draw_vertical_line(SGFXSurface *surface, int x, int y0, int y1,
+                                 uint32_t rgba) {
   if (surface) {
     int i;
     if (y0 > y1) {
@@ -144,34 +142,33 @@ inline void __draw_vertical_line(IButterFreeSurface *surface, int x, int y0,
     }
     for (i = y0; i <= y1; i++) {
       if (i >= 0 && i <= surface->desc->height) {
-        __ibutterfree_draw_screenbuffer(surface, x, i, rgba);
+        __sgfx_draw_screenbuffer(surface, x, i, rgba);
       }
     }
   }
 }
 
-IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface *surface, int x0,
-                                      int y0, int x1, int y1) {
+SGFX_RET sgfx_draw_line(SGFXSurface *surface, int x0, int y0, int x1, int y1) {
   if (surface) {
     if (x0 == x1) {
       if (x0 >= 0 && x0 <= surface->desc->width) {
         __draw_vertical_line(surface, x0, y0, y1, surface->desc->color);
-        return IBUTTERFREE_OK;
+        return SGFX_OK;
       } else {
-        IBUTTERFREE_LOG_ERROR("Invalid value for x.");
-        ibutterfree_set_message_error("Invalid value for x.");
-        return IBUTTERFREE_ERROR;
+        SGFX_LOG_ERROR("Invalid value for x.");
+        sgfx_set_message_error("Invalid value for x.");
+        return SGFX_ERROR;
       }
     }
 
     if (y0 == y1) {
       if (y0 >= 0 && y0 <= surface->desc->height) {
         __draw_horizontal_line(surface, x0, x1, y0, surface->desc->color);
-        return IBUTTERFREE_OK;
+        return SGFX_OK;
       } else {
-        IBUTTERFREE_LOG_ERROR("Invalid value for y.");
-        ibutterfree_set_message_error("Invalid value for y.");
-        return IBUTTERFREE_ERROR;
+        SGFX_LOG_ERROR("Invalid value for y.");
+        sgfx_set_message_error("Invalid value for y.");
+        return SGFX_ERROR;
       }
     }
 
@@ -198,8 +195,7 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface *surface, int x0,
         px += sdx;
         if (px >= 0 && px <= surface->desc->width && py >= 0 &&
             py <= surface->desc->height) {
-          __ibutterfree_draw_screenbuffer(surface, px, py,
-                                          surface->desc->color);
+          __sgfx_draw_screenbuffer(surface, px, py, surface->desc->color);
         }
       }
     } else {
@@ -212,49 +208,44 @@ IBUTTERFREE_RET ibutterfree_draw_line(IButterFreeSurface *surface, int x0,
         py += sdy;
         if (px >= 0 && px <= surface->desc->width && py >= 0 &&
             py <= surface->desc->height) {
-          __ibutterfree_draw_screenbuffer(surface, px, py,
-                                          surface->desc->color);
+          __sgfx_draw_screenbuffer(surface, px, py, surface->desc->color);
         }
       }
     }
 
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("ibutterfree_draw_line has failed");
-    ibutterfree_set_message_error("ibutterfree_draw_line has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("sgfx_draw_line has failed");
+    sgfx_set_message_error("sgfx_draw_line has failed");
+    return SGFX_ERROR;
   }
 }
 
-IBUTTERFREE_RET ibutterfree_draw_circle(IButterFreeSurface *surface, double cx,
-                                        double cy, int radius) {
+SGFX_RET sgfx_draw_circle(SGFXSurface *surface, double cx, double cy,
+                          int radius) {
   if (surface) {
     // Using Midpoint Circle Algorithm
-    inline void plot4points(IButterFreeSurface * surface, double cx, double cy,
+    inline void plot4points(SGFXSurface * surface, double cx, double cy,
                             double x, double y, uint32_t rgba) {
       if (cx + x >= 0 && cx + x <= surface->desc->width && cy + y >= 0 &&
           cy + y <= surface->desc->height) {
-        __ibutterfree_draw_screenbuffer(surface, cx + x, cy + y,
-                                        surface->desc->color);
+        __sgfx_draw_screenbuffer(surface, cx + x, cy + y, surface->desc->color);
       }
       if (cx - x >= 0 && cx - x <= surface->desc->width && cy + y >= 0 &&
           cy + y <= surface->desc->height) {
-        __ibutterfree_draw_screenbuffer(surface, cx - x, cy + y,
-                                        surface->desc->color);
+        __sgfx_draw_screenbuffer(surface, cx - x, cy + y, surface->desc->color);
       }
       if (cx + x >= 0 && cx + x <= surface->desc->width && cy - y >= 0 &&
           cy - y <= surface->desc->height) {
-        __ibutterfree_draw_screenbuffer(surface, cx + x, cy - y,
-                                        surface->desc->color);
+        __sgfx_draw_screenbuffer(surface, cx + x, cy - y, surface->desc->color);
       }
       if (cx - x >= 0 && cx - x <= surface->desc->width && cy - y >= 0 &&
           cy - y <= surface->desc->height) {
-        __ibutterfree_draw_screenbuffer(surface, cx - x, cy - y,
-                                        surface->desc->color);
+        __sgfx_draw_screenbuffer(surface, cx - x, cy - y, surface->desc->color);
       }
     }
 
-    inline void plot8points(IButterFreeSurface * surface, double cx, double cy,
+    inline void plot8points(SGFXSurface * surface, double cx, double cy,
                             double x, double y, uint32_t rgba) {
       plot4points(surface, cx, cy, x, y, rgba);
       plot4points(surface, cx, cy, y, x, rgba);
@@ -277,18 +268,18 @@ IBUTTERFREE_RET ibutterfree_draw_circle(IButterFreeSurface *surface, double cx,
         error += -x;
       }
     }
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("ibutterfree_draw_circle has failed");
-    ibutterfree_set_message_error("ibutterfree_draw_circle has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("sgfx_draw_circle has failed");
+    sgfx_set_message_error("sgfx_draw_circle has failed");
+    return SGFX_ERROR;
   }
 }
 
-IBUTTERFREE_RET ibutterfree_fill_circle(IButterFreeSurface *surface, double cx,
-                                        double cy, int radius) {
+SGFX_RET sgfx_fill_circle(SGFXSurface *surface, double cx, double cy,
+                          int radius) {
   if (surface) {
-    ibutterfree_draw_circle(surface, cx, cy, radius);
+    sgfx_draw_circle(surface, cx, cy, radius);
     double x0, x1, y0, y1;
     if (2 * radius < surface->desc->width) {
       x0 = abs(cx - radius);
@@ -320,30 +311,29 @@ IBUTTERFREE_RET ibutterfree_fill_circle(IButterFreeSurface *surface, double cx,
           continue;
         }
         if (dx + dy <= radius) {
-          __ibutterfree_draw_screenbuffer(surface, i, j, surface->desc->color);
+          __sgfx_draw_screenbuffer(surface, i, j, surface->desc->color);
           continue;
         }
         if (dx * dx + dy * dy <= radius * radius) {
-          __ibutterfree_draw_screenbuffer(surface, i, j, surface->desc->color);
+          __sgfx_draw_screenbuffer(surface, i, j, surface->desc->color);
         }
       }
     }
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
     ;
   } else {
-    IBUTTERFREE_LOG_ERROR("ibutterfree_fill_circle has failed");
-    ibutterfree_set_message_error("ibutterfree_fill_circle has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("sgfx_fill_circle has failed");
+    sgfx_set_message_error("sgfx_fill_circle has failed");
+    return SGFX_ERROR;
   }
 }
 
-IBUTTERFREE_RET ibutterfree_draw_rect(IButterFreeSurface *surface, int x0,
-                                      int y0, int w, int h) {
+SGFX_RET sgfx_draw_rect(SGFXSurface *surface, int x0, int y0, int w, int h) {
   if (surface) {
     if (h <= 0 && w <= 0) {
-      IBUTTERFREE_LOG_ERROR("Wrong values for width and height");
-      ibutterfree_set_message_error("Wrong values for width and height");
-      return IBUTTERFREE_ERROR;
+      SGFX_LOG_ERROR("Wrong values for width and height");
+      sgfx_set_message_error("Wrong values for width and height");
+      return SGFX_ERROR;
     }
     int x1 = x0 + w;
     int y1 = y0 + h;
@@ -351,21 +341,20 @@ IBUTTERFREE_RET ibutterfree_draw_rect(IButterFreeSurface *surface, int x0,
     __draw_horizontal_line(surface, x0, x1, y1, surface->desc->color);
     __draw_vertical_line(surface, x0, y0, y1, surface->desc->color);
     __draw_vertical_line(surface, x1, y0, y1, surface->desc->color);
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("ibutterfree_draw_rect has failed")
-    ibutterfree_set_message_error("ibutterfree_draw_rect has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("sgfx_draw_rect has failed")
+    sgfx_set_message_error("sgfx_draw_rect has failed");
+    return SGFX_ERROR;
   }
 }
 
-IBUTTERFREE_RET ibutterfree_fill_rect(IButterFreeSurface *surface, int x0,
-                                      int y0, int w, int h) {
+SGFX_RET sgfx_fill_rect(SGFXSurface *surface, int x0, int y0, int w, int h) {
   if (surface) {
     if (h <= 0 && w <= 0) {
-      IBUTTERFREE_LOG_ERROR("Wrong values for width and height");
-      ibutterfree_set_message_error("Wrong values for width and height");
-      return IBUTTERFREE_ERROR;
+      SGFX_LOG_ERROR("Wrong values for width and height");
+      sgfx_set_message_error("Wrong values for width and height");
+      return SGFX_ERROR;
     }
     int x1 = x0 + w;
     int y1 = y0 + h;
@@ -373,50 +362,46 @@ IBUTTERFREE_RET ibutterfree_fill_rect(IButterFreeSurface *surface, int x0,
     for (i = x0; i <= x1; i++) {
       __draw_vertical_line(surface, i, y0, y1, surface->desc->color);
     }
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("ibutterfree_fill_rect has failed");
-    ibutterfree_set_message_error("ibutterfree_fill_rect has failed");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("sgfx_fill_rect has failed");
+    sgfx_set_message_error("sgfx_fill_rect has failed");
+    return SGFX_ERROR;
   }
 }
 
-IBUTTERFREE_RET ibutterfree_set_color(IButterFreeSurface *surface,
-                                      int32_t color) {
+SGFX_RET sgfx_set_color(SGFXSurface *surface, int32_t color) {
   surface->desc->color = color;
-  return IBUTTERFREE_OK;
+  return SGFX_OK;
 }
 
-IBUTTERFREE_RET ibutterfree_flip(IButterFreeSurface *surface,
-                                 IButterFreeRect *rect) {
-  if (surface && m_bfs) {
+SGFX_RET sgfx_flip(SGFXSurface *surface, SGFXRect *rect) {
+  if (surface && m_sgfs) {
     int i = 0;
 
     if (surface->desc->type == PRIMARY) {
       if (!rect) {
         for (i = 0; i < surface->desc->screensize; i += 1) {
-          __ibutterfree_draw_pixel(surface, i % surface->desc->width,
-                                   i / surface->desc->width,
-                                   surface->screenbuffer[i]);
+          __sgfx_draw_pixel(surface, i % surface->desc->width,
+                            i / surface->desc->width, surface->screenbuffer[i]);
         }
       } else {
         for (i = rect->x; i < (rect->w * rect->h); i += 1) {
-          __ibutterfree_draw_pixel(surface, i % surface->desc->width + rect->y,
-                                   i / surface->desc->width + rect->y,
-                                   surface->screenbuffer[i]);
+          __sgfx_draw_pixel(surface, i % surface->desc->width + rect->y,
+                            i / surface->desc->width + rect->y,
+                            surface->screenbuffer[i]);
         }
       }
     }
 
     if (surface->desc->buffer == DOUBLE) {
-      __ibutterfree_swap_buffers();
+      __sgfx_swap_buffers();
     }
 
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("Invalid IButterFreeSurface or IButterFreeStruct");
-    ibutterfree_set_message_error(
-        "Invalid IButterFreeSurface or IButterFreeStruct");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("Invalid SGFXSurface or SGFXStruct");
+    sgfx_set_message_error("Invalid SGFXSurface or SGFXStruct");
+    return SGFX_ERROR;
   }
 }

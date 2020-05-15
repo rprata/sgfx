@@ -1,31 +1,31 @@
 /****************************************************************************
  * Copyright (C) 2017 by Renan Prata                                        *
  *                                                                          *
- * This file is part of IButterFree.                                        *
+ * This file is part of SGFX.                                        *
  *                                                                          *
  * This software may be modified and distributed under the terms            *
  * of the MIT license. See the LICENSE file for details.                    *
  ****************************************************************************/
 
 /**
- * @file ibutterfree_image.h
+ * @file sgfx_image.h
  * @author Renan Prata
  * @date 07 Jan 2016
- * @brief File containing image functions of IButterFree Library.
+ * @brief File containing image functions of SGFX Library.
  *
- * File containing image functions of IButterFree Library.
- * IButterFree has the possibility to render PNG, PPM and BMP images.
+ * File containing image functions of SGFX Library.
+ * SGFX has the possibility to render PNG, PPM and BMP images.
  * Requirements of PNG image: 8-bit/color RGBA, non-interlaced. In this case,
  * we must use images with 32bit (with alpha). So, if you want to convert
  * online, open the target image in https://pixlr.com/editor/ and save with full
  * quality.
  */
 
-#ifndef __IBUTTERFREE_IMAGE_H__
-#define __IBUTTERFREE_IMAGE_H__
+#ifndef __SGFX_IMAGE_H__
+#define __SGFX_IMAGE_H__
 
-#include "ibutterfree_draw.h"
-#include "ibutterfree_upng.h"
+#include "sgfx_draw.h"
+#include "sgfx_upng.h"
 
 #pragma pack(push, 1)
 
@@ -57,11 +57,11 @@ typedef struct {
  * @brief The type of image.
  */
 typedef enum {
-  IBUTTERFREE_IMAGE_TYPE_BMP = 0, /**< BMP type. */
-  IBUTTERFREE_IMAGE_TYPE_PPM,     /**< PPM type. */
-  IBUTTERFREE_IMAGE_TYPE_PNG,     /**< PNG type. */
-  IBUTTERFREE_IMAGE_TYPE_JPEG,    /**< JPEG type. */
-} IButterFreeImageType;
+  SGFX_IMAGE_TYPE_BMP = 0, /**< BMP type. */
+  SGFX_IMAGE_TYPE_PPM,     /**< PPM type. */
+  SGFX_IMAGE_TYPE_PNG,     /**< PNG type. */
+  SGFX_IMAGE_TYPE_JPEG,    /**< JPEG type. */
+} SGFXImageType;
 
 /**
  * @brief Draw a image on screenbuffer.
@@ -73,12 +73,10 @@ typedef enum {
  * @param width Width of image.
  * @param heigh Height of image.
  * @param type Type of image.
- * @return IBUTTERFREE_RET is returned. In case of success, returns
- * IBUTTERFREE_OK, else, it returns IBUTTERFREE_ERROR.
+ * @return SGFX_RET is returned. In case of success, returns
+ * SGFX_OK, else, it returns SGFX_ERROR.
  */
-IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
-                                       const char *filename, int x, int y,
-                                       int width, int height,
-                                       IButterFreeImageType type);
+SGFX_RET sgfx_draw_image(SGFXSurface *surface, const char *filename, int x,
+                         int y, int width, int height, SGFXImageType type);
 
 #endif

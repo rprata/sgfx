@@ -1,4 +1,4 @@
-#include "ibutterfree_image.h"
+#include "sgfx_image.h"
 
 unsigned char *__loadPPMImage(const char *filename, int *w, int *h) {
   int width, height, num, size;
@@ -213,18 +213,16 @@ int32_t *__resize_bilinear(int32_t *input, int sourceWidth, int sourceHeight,
   return temp;
 }
 
-IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
-                                       const char *filename, int x, int y,
-                                       int width, int height,
-                                       IButterFreeImageType type) {
+SGFX_RET sgfx_draw_image(SGFXSurface *surface, const char *filename, int x,
+                         int y, int width, int height, SGFXImageType type) {
   if (surface) {
-    if (type == IBUTTERFREE_IMAGE_TYPE_BMP) {
+    if (type == SGFX_IMAGE_TYPE_BMP) {
       BITMAPINFOHEADER bitmapInfoHeader;
       unsigned char *bitmapData = __loadBitmapFile(filename, &bitmapInfoHeader);
       if (bitmapData == NULL) {
-        IBUTTERFREE_LOG_ERROR("Error to create bmp image.");
-        ibutterfree_set_message_error("Error to create bmp image");
-        return IBUTTERFREE_ERROR;
+        SGFX_LOG_ERROR("Error to create bmp image.");
+        sgfx_set_message_error("Error to create bmp image");
+        return SGFX_ERROR;
       }
       int i, j;
       int bpp = bitmapInfoHeader.biBitCount / 8;
@@ -262,8 +260,8 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
         for (i = 0; i < height; i += 1) {
           for (j = 0; j < width; j += 1) {
             long absPosition = j + width * i;
-            ibutterfree_set_color(surface, resized_image[absPosition]);
-            ibutterfree_draw_point(surface, x + j, y + i);
+            sgfx_set_color(surface, resized_image[absPosition]);
+            sgfx_draw_point(surface, x + j, y + i);
           }
         }
       } else {
@@ -279,24 +277,24 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
                 ((bpp == 4) ? ((bitmapData[absPosition + 3]) & 0x000000FF)
                             : 0x000000FF);
 
-            ibutterfree_set_color(surface, color);
-            ibutterfree_draw_point(
-                surface, x + abs(j / bpp - bitmapInfoHeader.biWidth),
-                y + abs(i / bpp - bitmapInfoHeader.biHeight));
+            sgfx_set_color(surface, color);
+            sgfx_draw_point(surface,
+                            x + abs(j / bpp - bitmapInfoHeader.biWidth),
+                            y + abs(i / bpp - bitmapInfoHeader.biHeight));
           }
         }
       }
 
-    } else if (type == IBUTTERFREE_IMAGE_TYPE_PPM) {
+    } else if (type == SGFX_IMAGE_TYPE_PPM) {
       int i, j;
       int w = 0;
       int h = 0;
       unsigned char *ppmData = __loadPPMImage(filename, &w, &h);
 
       if (ppmData == NULL) {
-        IBUTTERFREE_LOG_ERROR("Error to create ppm image.");
-        ibutterfree_set_message_error("Error to create ppm image");
-        return IBUTTERFREE_ERROR;
+        SGFX_LOG_ERROR("Error to create ppm image.");
+        sgfx_set_message_error("Error to create ppm image");
+        return SGFX_ERROR;
       }
 
       if ((width != w && width != -1) || (height != h && height != -1)) {
@@ -323,8 +321,8 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
         for (i = 0; i < height; i += 1) {
           for (j = 0; j < width; j += 1) {
             long absPosition = j + width * i;
-            ibutterfree_set_color(surface, resized_image[absPosition]);
-            ibutterfree_draw_point(surface, x + j, y + i);
+            sgfx_set_color(surface, resized_image[absPosition]);
+            sgfx_draw_point(surface, x + j, y + i);
           }
         }
 
@@ -337,26 +335,24 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
                             ((ppmData[absPosition + 2] << 8) & 0x0000FF00) +
                             0x000000FF;
 
-            ibutterfree_set_color(surface, color);
-            ibutterfree_draw_point(surface, x + j / 3, y + i / 3);
+            sgfx_set_color(surface, color);
+            sgfx_draw_point(surface, x + j / 3, y + i / 3);
           }
         }
       }
-    } else if (type == IBUTTERFREE_IMAGE_TYPE_PNG) {
-      ibutterfree_upng_t *ibutterfree_upng =
-          ibutterfree_upng_new_from_file(filename);
-      ibutterfree_upng_decode(ibutterfree_upng);
-      if (ibutterfree_upng_get_error(ibutterfree_upng) != UPNG_EOK) {
-        IBUTTERFREE_LOG_ERROR("Error to create png image.");
-        ibutterfree_set_message_error("Error to create png image.");
-        return IBUTTERFREE_ERROR;
+    } else if (type == SGFX_IMAGE_TYPE_PNG) {
+      sgfx_upng_t *sgfx_upng = sgfx_upng_new_from_file(filename);
+      sgfx_upng_decode(sgfx_upng);
+      if (sgfx_upng_get_error(sgfx_upng) != UPNG_EOK) {
+        SGFX_LOG_ERROR("Error to create png image.");
+        sgfx_set_message_error("Error to create png image.");
+        return SGFX_ERROR;
       }
 
-      const unsigned char *pngData =
-          ibutterfree_upng_get_buffer(ibutterfree_upng);
-      unsigned w = ibutterfree_upng_get_width(ibutterfree_upng);
-      unsigned h = ibutterfree_upng_get_height(ibutterfree_upng);
-      unsigned bpp = ibutterfree_upng_get_bpp(ibutterfree_upng) / 8;
+      const unsigned char *pngData = sgfx_upng_get_buffer(sgfx_upng);
+      unsigned w = sgfx_upng_get_width(sgfx_upng);
+      unsigned h = sgfx_upng_get_height(sgfx_upng);
+      unsigned bpp = sgfx_upng_get_bpp(sgfx_upng) / 8;
 
       int i, j;
 
@@ -387,8 +383,8 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
         for (i = 0; i < height; i += 1) {
           for (j = 0; j < width; j += 1) {
             long absPosition = j + width * i;
-            ibutterfree_set_color(surface, resized_image[absPosition]);
-            ibutterfree_draw_point(surface, x + j, y + i);
+            sgfx_set_color(surface, resized_image[absPosition]);
+            sgfx_draw_point(surface, x + j, y + i);
           }
         }
 
@@ -403,19 +399,19 @@ IBUTTERFREE_RET ibutterfree_draw_image(IButterFreeSurface *surface,
                 ((bpp == 4) ? ((pngData[absPosition + 3]) & 0x000000FF)
                             : 0x000000FF);
 
-            ibutterfree_set_color(surface, color);
-            ibutterfree_draw_point(surface, x + j / bpp, y + i / bpp);
+            sgfx_set_color(surface, color);
+            sgfx_draw_point(surface, x + j / bpp, y + i / bpp);
           }
         }
       }
-    } else if (type == IBUTTERFREE_IMAGE_TYPE_JPEG) {
-      return IBUTTERFREE_NOT_IMPLEMENTED;
+    } else if (type == SGFX_IMAGE_TYPE_JPEG) {
+      return SGFX_NOT_IMPLEMENTED;
     }
 
-    return IBUTTERFREE_OK;
+    return SGFX_OK;
   } else {
-    IBUTTERFREE_LOG_ERROR("Error to create image.");
-    ibutterfree_set_message_error("Error to create image.");
-    return IBUTTERFREE_ERROR;
+    SGFX_LOG_ERROR("Error to create image.");
+    sgfx_set_message_error("Error to create image.");
+    return SGFX_ERROR;
   }
 }
