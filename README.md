@@ -13,6 +13,15 @@ SGFX is a lightweight embedded library for displays and touchscreens providing e
 * Lightweight, OpenSource, Portable and Modular;
 * Lua support
 
+## Supported platforms
+- [x] Raspberry Pi 1 Model B
+- [x] Raspberry Pi 2 Model B
+- [x] Raspberry Pi 3
+- [ ] Raspberry Pi 4
+- [ ] Odroid C2
+
+If you have a suggestion or want contribuite with a new portings, create an issue :wink:
+
 ## Installation
 SGFX requires [CMake](https://cmake.org/) to compile. Follow the instructions:
 ```sh
