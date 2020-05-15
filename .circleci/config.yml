@@ -11,7 +11,19 @@ jobs:
           command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
       - run:
           name: Installing tools
-          command: 'apt-get update && apt-get install -y gcc g++ cmake'
+          command: 'apt-get update && apt-get install -y gcc g++ cmake clang-format'
+      - run:
+          name: Checking code format
+          command: |
+                  SOURCE_FILES=`find . -name \*.c -type f -or -name \*.h -type f`
+                  for SOURCE_FILE in $SOURCE_FILES
+                  do
+                  export FORMATTING_ISSUE_COUNT=`clang-format -output-replacements-xml $SOURCE_FILE | grep offset | wc -l`
+                  if [ "$FORMATTING_ISSUE_COUNT" -gt "0" ]; then
+                      echo "Source file $SOURCE_FILE contains formatting issues. Please use clang-format tool (find . -regex '.*\.\(c\|h\)' -exec \$CLANG_FORMAT -style=file -i {} \;) to resolve found issues."
+                      exit 1
+                  fi
+                  done
       - run:
           name: Configuring build environment
           command: 'cmake CMakeLists.txt -Bbuild'
