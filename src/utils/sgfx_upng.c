@@ -1308,8 +1308,8 @@ sgfx_upng_t *sgfx_upng_new_from_file(const char *filename) {
     return sgfx_upng;
   }
 
-  fread(buffer, 1, (unsigned long)size, file);
-  if (ferror(file)) {
+  size_t ret = fread(buffer, 1, (unsigned long)size, file);
+  if (ferror(file) && ret < size) {
     fclose(file);
     SET_ERROR(sgfx_upng, UPNG_ENOTFOUND);
     return sgfx_upng;
