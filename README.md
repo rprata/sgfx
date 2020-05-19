@@ -36,21 +36,19 @@ SGFX is a lightweight embedded library for displays and touchscreens providing e
 If you have a suggestion or want contribuite with a new portings, create an issue :wink:
 
 ## Installation
-SGFX requires [CMake](https://cmake.org/) to compile. Follow the instructions:
+SGFX requires [CMake](https://cmake.org/) and [Ninja](https://ninja-build.org/) to compile. Follow the instructions:
 ```sh
 $ cd sgfx
 $ mkdir build
 $ cmake CMakeLists.txt -Bbuild -GNinja
-$ cd build
-$ make
+$ cmake --build build
 ```
 In case of cross compilation:
 ```sh
 $ cd sgfx
 $ mkdir build
 $ cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/<toolchain_file>.cmake
-$ cd build
-$ make
+$ cmake --build build
 ```
 
 ## Running examples
