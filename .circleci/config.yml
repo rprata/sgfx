@@ -123,7 +123,28 @@ jobs:
       - run:
           name: Building project
           command: 'cmake --build build'
-
+  build-odroid-c2:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - checkout
+      - run:
+          name: Configuring linux environment
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing tools
+          command: |
+                  apt-get update && apt-get install -y gcc sed g++ cmake wget tar xz-utils ninja-build
+                  wget -c https://releases.linaro.org/components/toolchain/binaries/6.1-2016.08/aarch64-linux-gnu/gcc-linaro-6.1.1-2016.08-x86_64_aarch64-linux-gnu.tar.xz
+                  tar xf gcc-linaro-6.1.1-2016.08-x86_64_aarch64-linux-gnu.tar.xz 
+      - run:
+          name: Configuring build environment
+          command: |
+                  sed -i 's/SET(ODROID_C2 "")/SET(ODROID_C2 "\/root\/project")/g' toolchains/odroid-c2-toolchain.cmake
+                  cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/odroid-c2-toolchain.cmake
+      - run:
+          name: Building project
+          command: 'cmake --build build'
 workflows:
     version: 2.1
     build:
@@ -133,3 +154,4 @@ workflows:
             - build-beagle-bone-black
             - build-rpi-1
             - build-rpi-2
+            - build-odroid-c2
