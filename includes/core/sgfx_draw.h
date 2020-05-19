@@ -24,6 +24,7 @@
 #define __SGFX_DRAW_H__
 
 #include "sgfx_surface.h"
+#include <math.h>
 
 /**
  * @brief Structure relative of point.

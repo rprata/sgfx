@@ -62,6 +62,7 @@ SGFX_RET __sgfx_draw_pixel(SGFXSurface *surface, int px, int py, int32_t rgba) {
     return SGFX_ERROR;
   }
 }
+
 SGFX_RET __sgfx_draw_screenbuffer(SGFXSurface *surface, int px, int py,
                                   int32_t rgba) {
 
@@ -114,8 +115,8 @@ SGFX_RET sgfx_draw_point(SGFXSurface *surface, int px, int py) {
   }
 }
 
-inline void __draw_horizontal_line(SGFXSurface *surface, int x0, int x1, int y,
-                                   uint32_t rgba) {
+void __draw_horizontal_line(SGFXSurface *surface, int x0, int x1, int y,
+                            uint32_t rgba) {
   if (surface) {
     int i;
     if (x0 > x1) {
@@ -131,8 +132,8 @@ inline void __draw_horizontal_line(SGFXSurface *surface, int x0, int x1, int y,
   }
 }
 
-inline void __draw_vertical_line(SGFXSurface *surface, int x, int y0, int y1,
-                                 uint32_t rgba) {
+void __draw_vertical_line(SGFXSurface *surface, int x, int y0, int y1,
+                          uint32_t rgba) {
   if (surface) {
     int i;
     if (y0 > y1) {
@@ -221,35 +222,35 @@ SGFX_RET sgfx_draw_line(SGFXSurface *surface, int x0, int y0, int x1, int y1) {
   }
 }
 
+void plot4points(SGFXSurface *surface, double cx, double cy, double x, double y,
+                 uint32_t rgba) {
+  if (cx + x >= 0 && cx + x <= surface->desc->width && cy + y >= 0 &&
+      cy + y <= surface->desc->height) {
+    __sgfx_draw_screenbuffer(surface, cx + x, cy + y, surface->desc->color);
+  }
+  if (cx - x >= 0 && cx - x <= surface->desc->width && cy + y >= 0 &&
+      cy + y <= surface->desc->height) {
+    __sgfx_draw_screenbuffer(surface, cx - x, cy + y, surface->desc->color);
+  }
+  if (cx + x >= 0 && cx + x <= surface->desc->width && cy - y >= 0 &&
+      cy - y <= surface->desc->height) {
+    __sgfx_draw_screenbuffer(surface, cx + x, cy - y, surface->desc->color);
+  }
+  if (cx - x >= 0 && cx - x <= surface->desc->width && cy - y >= 0 &&
+      cy - y <= surface->desc->height) {
+    __sgfx_draw_screenbuffer(surface, cx - x, cy - y, surface->desc->color);
+  }
+}
+
+void plot8points(SGFXSurface *surface, double cx, double cy, double x, double y,
+                 uint32_t rgba) {
+  plot4points(surface, cx, cy, x, y, rgba);
+  plot4points(surface, cx, cy, y, x, rgba);
+}
+
 SGFX_RET sgfx_draw_circle(SGFXSurface *surface, double cx, double cy,
                           int radius) {
   if (surface) {
-    // Using Midpoint Circle Algorithm
-    inline void plot4points(SGFXSurface * surface, double cx, double cy,
-                            double x, double y, uint32_t rgba) {
-      if (cx + x >= 0 && cx + x <= surface->desc->width && cy + y >= 0 &&
-          cy + y <= surface->desc->height) {
-        __sgfx_draw_screenbuffer(surface, cx + x, cy + y, surface->desc->color);
-      }
-      if (cx - x >= 0 && cx - x <= surface->desc->width && cy + y >= 0 &&
-          cy + y <= surface->desc->height) {
-        __sgfx_draw_screenbuffer(surface, cx - x, cy + y, surface->desc->color);
-      }
-      if (cx + x >= 0 && cx + x <= surface->desc->width && cy - y >= 0 &&
-          cy - y <= surface->desc->height) {
-        __sgfx_draw_screenbuffer(surface, cx + x, cy - y, surface->desc->color);
-      }
-      if (cx - x >= 0 && cx - x <= surface->desc->width && cy - y >= 0 &&
-          cy - y <= surface->desc->height) {
-        __sgfx_draw_screenbuffer(surface, cx - x, cy - y, surface->desc->color);
-      }
-    }
-
-    inline void plot8points(SGFXSurface * surface, double cx, double cy,
-                            double x, double y, uint32_t rgba) {
-      plot4points(surface, cx, cy, x, y, rgba);
-      plot4points(surface, cx, cy, y, x, rgba);
-    }
 
     int error = -radius;
     double x = radius;
@@ -282,15 +283,15 @@ SGFX_RET sgfx_fill_circle(SGFXSurface *surface, double cx, double cy,
     sgfx_draw_circle(surface, cx, cy, radius);
     double x0, x1, y0, y1;
     if (2 * radius < surface->desc->width) {
-      x0 = abs(cx - radius);
-      x1 = abs(cx + radius);
+      x0 = fabs(cx - radius);
+      x1 = fabs(cx + radius);
     } else {
       x0 = 0;
       x1 = surface->desc->width;
     }
     if (2 * radius < surface->desc->height) {
-      y0 = abs(cy - radius);
-      y1 = abs(cy + radius);
+      y0 = fabs(cy - radius);
+      y1 = fabs(cy + radius);
     } else {
       y0 = 0;
       y1 = surface->desc->height;
@@ -302,11 +303,11 @@ SGFX_RET sgfx_fill_circle(SGFXSurface *surface, double cx, double cy,
 
     for (i = x0; i < x1; i++) {
       for (j = y0; j < y1; j++) {
-        dx = abs(i - cx);
+        dx = fabs(i - cx);
         if (dx > radius) {
           continue;
         }
-        dy = abs(j - cy);
+        dy = fabs(j - cy);
         if (dy > radius) {
           continue;
         }

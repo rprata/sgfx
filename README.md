@@ -28,7 +28,7 @@ SGFX requires [CMake](https://cmake.org/) to compile. Follow the instructions:
 ```sh
 $ cd sgfx
 $ mkdir build
-$ cmake CMakeLists.txt -Bbuild
+$ cmake CMakeLists.txt -Bbuild -GNinja
 $ cd build
 $ make
 ```
@@ -36,7 +36,7 @@ In case of cross compilation:
 ```sh
 $ cd sgfx
 $ mkdir build
-$ cmake CMakeLists.txt -Bbuild -DCMAKE_TOOLCHAIN_FILE=toolchains/<toolchain_file>.cmake
+$ cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/<toolchain_file>.cmake
 $ cd build
 $ make
 ```
