@@ -13,7 +13,19 @@ SGFX is a lightweight embedded library for displays and touchscreens providing e
 * Lightweight, OpenSource, Portable and Modular;
 * Lua support
 
-## Supported platforms
+## Supported compilers
+- [x] GCC
+- [x] Clang
+
+## Supported architectures
+- [x] x86
+- [x] x86_64
+- [x] ARMv5
+- [x] ARMv6
+- [x] ARMv7
+- [x] ARMv8 (32-bit/64-bit)
+
+## Tested platforms
 - [x] Raspberry Pi 1 Model B
 - [x] Raspberry Pi 2 Model B
 - [x] Raspberry Pi 3
