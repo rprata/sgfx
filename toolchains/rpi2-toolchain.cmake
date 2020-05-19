@@ -1,7 +1,8 @@
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_SYSTEM_VERSION 1.0.0)
 
-SET(TOOLCHAIN_ROOT ${RPI_TOOLCHAIN}/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf)
+SET(RPI_TOOLCHAIN "")
+SET(TOOLCHAIN_ROOT ${RPI_TOOLCHAIN}/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf)
 SET(TOOLCHAIN_SYSROOT ${TOOLCHAIN_ROOT}/arm-linux-gnueabihf/sysroot)
 
 # specify the cross compiler

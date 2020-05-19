@@ -81,7 +81,48 @@ jobs:
       - run:
           name: Building project
           command: 'cmake --build build'
-
+  build-rpi-1:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - checkout
+      - run:
+          name: Configuring linux environment
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing tools
+          command: |
+                  dpkg --add-architecture i386 && apt-get update && apt-get install -y gcc sed g++ cmake wget git tar xz-utils ninja-build zlib1g:i386
+                  git clone https://github.com/raspberrypi/tools.git
+      - run:
+          name: Configuring build environment
+          command: |
+                  sed -i 's/SET(RPI_TOOLCHAIN "")/SET(RPI_TOOLCHAIN "\/root\/project")/g' toolchains/rpi1-toolchain.cmake
+                  cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/rpi1-toolchain.cmake
+      - run:
+          name: Building project
+          command: 'cmake --build build'
+  build-rpi-2:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - checkout
+      - run:
+          name: Configuring linux environment
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing tools
+          command: |
+                  apt-get update && apt-get install -y gcc sed g++ cmake wget git tar xz-utils ninja-build
+                  git clone https://github.com/raspberrypi/tools.git
+      - run:
+          name: Configuring build environment
+          command: |
+                  sed -i 's/SET(RPI_TOOLCHAIN "")/SET(RPI_TOOLCHAIN "\/root\/project")/g' toolchains/rpi2-toolchain.cmake
+                  cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/rpi2-toolchain.cmake
+      - run:
+          name: Building project
+          command: 'cmake --build build'
 
 workflows:
     version: 2.1
@@ -90,3 +131,5 @@ workflows:
             - build-gcc
             - build-clang
             - build-beagle-bone-black
+            - build-rpi-1
+            - build-rpi-2
