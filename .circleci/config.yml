@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-gcc:
     docker:
       - image: "debian:stretch"
     steps:
@@ -30,3 +30,40 @@ jobs:
       - run:
           name: Building project
           command: 'cmake --build build'
+  build-clang:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - checkout
+      - run:
+          name: Configuring linux environment
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing tools
+          command: 'apt-get update && apt-get install -y cmake clang clang-format ninja-build'
+      - run:
+          name: Checking code format
+          command: |
+                  SOURCE_FILES=`find . -name \*.c -type f -or -name \*.h -type f`
+                  for SOURCE_FILE in $SOURCE_FILES
+                  do
+                  export FORMATTING_ISSUE_COUNT=`clang-format -output-replacements-xml $SOURCE_FILE | grep offset | wc -l`
+                  if [ "$FORMATTING_ISSUE_COUNT" -gt "0" ]; then
+                      echo "Source file $SOURCE_FILE contains formatting issues. Please use clang-format tool (find . -regex '.*\.\(c\|h\)' -exec \$CLANG_FORMAT -style=file -i {} \;) to resolve found issues."
+                      exit 1
+                  fi
+                  done
+      - run:
+          name: Configuring build environment
+          command: 'cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/clang-toolchain.cmake'
+      - run:
+          name: Building project
+          command: 'cmake --build build'
+
+
+workflows:
+    version: 2.1
+    build:
+        jobs:
+            - build-gcc
+            - build-clang
