@@ -17,16 +17,16 @@ int main(int argc, char **argv) {
       int xres, yres;
       sgfx_get_resolution(&surface, &xres, &yres);
       sgfx_clear_surface(&surface, (int32_t)0x000000FF);
-      sgfx_draw_image(&surface, "../examples/resources/images/SGFX.bmp",
+      sgfx_draw_image(&surface, "../examples/resources/images/butterfree.bmp",
                       xres / 7, yres / 4, xres / 7, xres / 7,
                       SGFX_IMAGE_TYPE_BMP);
-      sgfx_draw_image(&surface, "../examples/resources/images/SGFX.ppm",
+      sgfx_draw_image(&surface, "../examples/resources/images/butterfree.ppm",
                       xres / 4, yres / 2, xres / 7, xres / 7,
                       SGFX_IMAGE_TYPE_PPM);
-      sgfx_draw_image(&surface, "../examples/resources/images/SGFX.png",
+      sgfx_draw_image(&surface, "../examples/resources/images/butterfree.png",
                       xres / 7, yres / 2, xres / 7, xres / 7,
                       SGFX_IMAGE_TYPE_PNG);
-      sgfx_draw_image(&surface, "../examples/resources/images/SGFX.png",
+      sgfx_draw_image(&surface, "../examples/resources/images/butterfree.png",
                       xres / 4, yres / 4, xres / 7, xres / 7,
                       SGFX_IMAGE_TYPE_PNG);
       sgfx_flip(&surface, NULL);
