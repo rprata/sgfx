@@ -59,6 +59,28 @@ jobs:
       - run:
           name: Building project
           command: 'cmake --build build'
+  build-beagle-bone-black:
+    docker:
+      - image: "debian:stretch"
+    steps:
+      - checkout
+      - run:
+          name: Configuring linux environment
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing tools
+          command: |
+                  apt-get update && apt-get install -y gcc sed g++ cmake wget tar xz-utils ninja-build
+                  wget -c https://releases.linaro.org/components/toolchain/binaries/6.5-2018.12/arm-linux-gnueabihf/gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf.tar.xz
+                  tar xf gcc-linaro-6.5.0-2018.12-x86_64_arm-linux-gnueabihf.tar.xz
+      - run:
+          name: Configuring build environment
+          command: |
+                  sed -i 's/SET(BEAGLE_BONE_BLACK "")/SET(BEAGLE_BONE_BLACK "\/root\/project")/g' toolchains/bbblack-toolchain.cmake
+                  cmake CMakeLists.txt -Bbuild -GNinja -DCMAKE_TOOLCHAIN_FILE=toolchains/bbblack-toolchain.cmake
+      - run:
+          name: Building project
+          command: 'cmake --build build'
 
 
 workflows:
@@ -67,3 +89,4 @@ workflows:
         jobs:
             - build-gcc
             - build-clang
+            - build-beagle-bone-black
