@@ -11,7 +11,7 @@ SGFX is a lightweight embedded library for displays and touchscreens providing e
 * Support of advanced graphics operations such as multiple alpha blending modes;
 * No kernel modifications;
 * Lightweight, OpenSource, Portable and Modular;
-* Lua support
+* Lua support (experimental)
 
 ## Supported compilers
 - [x] GCC
