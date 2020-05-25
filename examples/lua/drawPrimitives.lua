@@ -10,7 +10,10 @@ if ret == true then
         buffer = 1
     }
     surface, err = sgfx.create_surface(desc)
-    print(surface, err)
+    if surface then
+        res, x, y = sgfx.get_resolution(surface)
+        print(x, y)
+    end
     sgfx.close()
 else 
     print(err)
