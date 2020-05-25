@@ -3,9 +3,25 @@
 #include <lualib.h>
 
 #include "sgfx.h"
+#include "sgfx_draw.h"
 #include "sgfx_log.h"
 #include "sgfx_surface.h"
 // https://gist.github.com/bloodstalker/91261e541666f16c3b8315d3ff1085d6
+
+static SGFXRect __checkSGFXRect(lua_State *L, int index) {
+  SGFXRect rect;
+
+  lua_getfield(L, index, "x");
+  rect.x = (int)lua_tonumber(L, index);
+  lua_getfield(L, index - 1, "y");
+  rect.y = (int)lua_tonumber(L, index);
+  lua_getfield(L, index - 2, "w");
+  rect.w = (int32_t)lua_tonumber(L, index);
+  lua_getfield(L, index - 3, "h");
+  rect.h = (SGFXSurfaceType)lua_tonumber(L, index);
+
+  return rect;
+}
 
 static SGFXSurfaceDescription __checkSGFXSurfaceDescription(lua_State *L,
                                                             int index) {
