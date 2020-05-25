@@ -153,6 +153,12 @@ static int _lua_sgfx_flip(lua_State *L) {
   }
 }
 
+static int _lua_sgfx_destroy_surface(lua_State *L) {
+  SGFXSurface *surface = __checkSGFXSurface(L, -1);
+  sgfx_destroy_surface(surface);
+  return 0;
+}
+
 static const struct luaL_Reg sgfx[] = {
     {"init", _lua_sgfx_init},
     {"close", _lua_sgfx_close},
@@ -160,6 +166,7 @@ static const struct luaL_Reg sgfx[] = {
     {"get_resolution", _lua_sgfx_get_resolution},
     {"clear_surface", _lua_sgfx_clear_surface},
     {"flip", _lua_sgfx_flip},
+    {"destroy_surface", _lua_sgfx_destroy_surface},
     {NULL, NULL}};
 
 int luaopen_sgfx(lua_State *L) {
