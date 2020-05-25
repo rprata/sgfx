@@ -8,17 +8,20 @@
 #include "sgfx_surface.h"
 // https://gist.github.com/bloodstalker/91261e541666f16c3b8315d3ff1085d6
 
-static SGFXRect __checkSGFXRect(lua_State *L, int index) {
-  SGFXRect rect;
+static SGFXRect *__checkSGFXRect(lua_State *L, int index) {
+  SGFXRect *rect = NULL;
 
-  lua_getfield(L, index, "x");
-  rect.x = (int)lua_tonumber(L, index);
-  lua_getfield(L, index - 1, "y");
-  rect.y = (int)lua_tonumber(L, index);
-  lua_getfield(L, index - 2, "w");
-  rect.w = (int32_t)lua_tonumber(L, index);
-  lua_getfield(L, index - 3, "h");
-  rect.h = (SGFXSurfaceType)lua_tonumber(L, index);
+  if (!lua_isnil(L, index)) {
+    rect = (SGFXRect *)malloc(sizeof(SGFXRect));
+    lua_getfield(L, index, "x");
+    rect->x = (int)lua_tonumber(L, index);
+    lua_getfield(L, index - 1, "y");
+    rect->y = (int)lua_tonumber(L, index);
+    lua_getfield(L, index - 2, "w");
+    rect->w = (int32_t)lua_tonumber(L, index);
+    lua_getfield(L, index - 3, "h");
+    rect->h = (SGFXSurfaceType)lua_tonumber(L, index);
+  }
 
   return rect;
 }
@@ -137,9 +140,11 @@ static int _lua_sgfx_clear_surface(lua_State *L) {
 }
 
 static int _lua_sgfx_flip(lua_State *L) {
-  SGFXRect rect = __checkSGFXRect(L, -1);
+  SGFXRect *rect = __checkSGFXRect(L, -1);
   SGFXSurface *surface = __checkSGFXSurface(L, -2);
-  if (sgfx_flip(surface, &rect) == SGFX_OK) {
+  if (sgfx_flip(surface, rect) == SGFX_OK) {
+    if (rect)
+      free(rect);
     lua_pushboolean(L, true);
     return 1;
   } else {
