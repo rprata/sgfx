@@ -12,7 +12,7 @@ if ret == true then
     surface, err = sgfx.create_surface(desc)
     if surface then
         res, x, y = sgfx.get_resolution(surface)
-        print(x, y)
+        sgfx.clear_surface(surface, desc.color);
     end
     sgfx.close()
 else 
