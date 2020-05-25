@@ -136,12 +136,30 @@ static int _lua_sgfx_clear_surface(lua_State *L) {
   }
 }
 
+static int _lua_sgfx_flip(lua_State *L) {
+  SGFXRect rect = __checkSGFXRect(L, -1);
+  SGFXSurface *surface = __checkSGFXSurface(L, -2);
+  if (sgfx_flip(surface, &rect) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
 static const struct luaL_Reg sgfx[] = {
     {"init", _lua_sgfx_init},
     {"close", _lua_sgfx_close},
     {"create_surface", _lua_sgfx_create_surface},
     {"get_resolution", _lua_sgfx_get_resolution},
     {"clear_surface", _lua_sgfx_clear_surface},
+    {"flip", _lua_sgfx_flip},
     {NULL, NULL}};
 
 int luaopen_sgfx(lua_State *L) {
