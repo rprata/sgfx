@@ -307,6 +307,23 @@ static int _lua_sgfx_fill_rect(lua_State *L) {
   }
 }
 
+static int _lua_sgfx_set_color(lua_State *L) {
+  int32_t color = (int32_t)lua_tonumber(L, -1);
+  SGFXSurface *surface = __checkSGFXSurface(L, -2);
+  if (sgfx_set_color(surface, color) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
 static int _lua_sgfx_flip(lua_State *L) {
   SGFXRect *rect = __checkSGFXRect(L, -1);
   SGFXSurface *surface = __checkSGFXSurface(L, -2);
@@ -347,6 +364,7 @@ static const struct luaL_Reg sgfx[] = {
     {"fill_circle", _lua_sgfx_fill_circle},
     {"draw_rect", _lua_sgfx_draw_rect},
     {"fill_rect", _lua_sgfx_fill_rect},
+    {"set_color", _lua_sgfx_set_color},
     {"flip", _lua_sgfx_flip},
     {"destroy_surface", _lua_sgfx_destroy_surface},
     {NULL, NULL}};
