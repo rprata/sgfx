@@ -267,6 +267,46 @@ static int _lua_sgfx_fill_circle(lua_State *L) {
   }
 }
 
+static int _lua_sgfx_draw_rect(lua_State *L) {
+  int h = (int)lua_tonumber(L, -1);
+  int w = (int)lua_tonumber(L, -2);
+  int y = (int)lua_tonumber(L, -3);
+  int x = (int)lua_tonumber(L, -4);
+  SGFXSurface *surface = __checkSGFXSurface(L, -5);
+  if (sgfx_draw_rect(surface, x, y, w, h) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
+static int _lua_sgfx_fill_rect(lua_State *L) {
+  int h = (int)lua_tonumber(L, -1);
+  int w = (int)lua_tonumber(L, -2);
+  int y = (int)lua_tonumber(L, -3);
+  int x = (int)lua_tonumber(L, -4);
+  SGFXSurface *surface = __checkSGFXSurface(L, -5);
+  if (sgfx_fill_rect(surface, x, y, w, h) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
 static int _lua_sgfx_flip(lua_State *L) {
   SGFXRect *rect = __checkSGFXRect(L, -1);
   SGFXSurface *surface = __checkSGFXSurface(L, -2);
@@ -305,6 +345,8 @@ static const struct luaL_Reg sgfx[] = {
     {"draw_line", _lua_sgfx_draw_line},
     {"draw_circle", _lua_sgfx_draw_circle},
     {"fill_circle", _lua_sgfx_fill_circle},
+    {"draw_rect", _lua_sgfx_draw_rect},
+    {"fill_rect", _lua_sgfx_fill_rect},
     {"flip", _lua_sgfx_flip},
     {"destroy_surface", _lua_sgfx_destroy_surface},
     {NULL, NULL}};
