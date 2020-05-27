@@ -139,10 +139,45 @@ static int _lua_sgfx_get_resolution(lua_State *L) {
   }
 }
 
+static int _lua_sgfx_surface_get_id(lua_State *L) {
+  SGFXSurface *surface = __checkSGFXSurface(L, -1);
+  int id = 0;
+  if (sgfx_surface_get_id(surface, &id) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    lua_pushnumber(L, id);
+    return 2;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
 static int _lua_sgfx_clear_surface(lua_State *L) {
   int32_t color = (int32_t)lua_tonumber(L, -1);
   SGFXSurface *surface = __checkSGFXSurface(L, -2);
   if (sgfx_clear_surface(surface, color) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
+static int _lua_sgfx_dump_surface(lua_State *L) {
+  const char *filename = lua_tostring(L, -1);
+  SGFXSurface *surface = __checkSGFXSurface(L, -2);
+  if (sgfx_dump_surface(surface, filename) == SGFX_OK) {
     lua_pushboolean(L, true);
     return 1;
   } else {
@@ -187,7 +222,9 @@ static const struct luaL_Reg sgfx[] = {
     {"create_surface", _lua_sgfx_create_surface},
     {"set_description", _lua_sgfx_set_description},
     {"get_resolution", _lua_sgfx_get_resolution},
+    {"get_surface_id", _lua_sgfx_surface_get_id},
     {"clear_surface", _lua_sgfx_clear_surface},
+    {"dump_surface", _lua_sgfx_dump_surface},
     {"flip", _lua_sgfx_flip},
     {"destroy_surface", _lua_sgfx_destroy_surface},
     {NULL, NULL}};
