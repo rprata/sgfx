@@ -67,11 +67,11 @@ typedef enum {
  * @brief Draw a image on screenbuffer.
  *
  * @param surface Surface that is used to draw.
- * @param filanme Path of image.
+ * @param filename Path of image.
  * @param x Begin position in x-axis.
  * @param y Begin position in y-axis.
  * @param width Width of image.
- * @param heigh Height of image.
+ * @param height Height of image.
  * @param type Type of image.
  * @return SGFX_RET is returned. In case of success, returns
  * SGFX_OK, else, it returns SGFX_ERROR.
