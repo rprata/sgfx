@@ -4,6 +4,7 @@
 
 #include "sgfx.h"
 #include "sgfx_draw.h"
+#include "sgfx_image.h"
 #include "sgfx_log.h"
 #include "sgfx_surface.h"
 // https://gist.github.com/bloodstalker/91261e541666f16c3b8315d3ff1085d6
@@ -343,6 +344,28 @@ static int _lua_sgfx_flip(lua_State *L) {
   }
 }
 
+static int _lua_sgfx_draw_image(lua_State *L) {
+  SGFXImageType type = (SGFXImageType)lua_tonumber(L, -1);
+  int h = (int)lua_tonumber(L, -2);
+  int w = (int)lua_tonumber(L, -3);
+  int y = (int)lua_tonumber(L, -4);
+  int x = (int)lua_tonumber(L, -5);
+  const char *filename = lua_tostring(L, -6);
+  SGFXSurface *surface = __checkSGFXSurface(L, -7);
+  if (sgfx_draw_image(surface, filename, x, y, w, h, type) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
 static int _lua_sgfx_destroy_surface(lua_State *L) {
   SGFXSurface *surface = __checkSGFXSurface(L, -1);
   sgfx_destroy_surface(surface);
@@ -366,6 +389,7 @@ static const struct luaL_Reg sgfx[] = {
     {"fill_rect", _lua_sgfx_fill_rect},
     {"set_color", _lua_sgfx_set_color},
     {"flip", _lua_sgfx_flip},
+    {"draw_image", _lua_sgfx_draw_image},
     {"destroy_surface", _lua_sgfx_destroy_surface},
     {NULL, NULL}};
 
