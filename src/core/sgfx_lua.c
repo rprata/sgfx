@@ -209,13 +209,51 @@ static int _lua_sgfx_draw_point(lua_State *L) {
   }
 }
 
-static int _lua_sgfx_draw_rect(lua_State *L) {
+static int _lua_sgfx_draw_line(lua_State *L) {
   int y1 = (int)lua_tonumber(L, -1);
   int x1 = (int)lua_tonumber(L, -2);
   int y0 = (int)lua_tonumber(L, -3);
   int x0 = (int)lua_tonumber(L, -4);
   SGFXSurface *surface = __checkSGFXSurface(L, -5);
-  if (sgfx_draw_rect(surface, x0, y0, x1, y1) == SGFX_OK) {
+  if (sgfx_draw_line(surface, x0, y0, x1, y1) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
+static int _lua_sgfx_draw_circle(lua_State *L) {
+  double r = (double)lua_tonumber(L, -1);
+  double cy = (double)lua_tonumber(L, -2);
+  int cx = (int)lua_tonumber(L, -3);
+  SGFXSurface *surface = __checkSGFXSurface(L, -4);
+  if (sgfx_draw_circle(surface, cx, cy, r) == SGFX_OK) {
+    lua_pushboolean(L, true);
+    return 1;
+  } else {
+    lua_pushboolean(L, false);
+    if (sgfx_get_message_error() != NULL) {
+      lua_pushlstring(L, sgfx_get_message_error(),
+                      strlen(sgfx_get_message_error()));
+      return 2;
+    }
+    return 1;
+  }
+}
+
+static int _lua_sgfx_fill_circle(lua_State *L) {
+  double r = (double)lua_tonumber(L, -1);
+  double cy = (double)lua_tonumber(L, -2);
+  int cx = (int)lua_tonumber(L, -3);
+  SGFXSurface *surface = __checkSGFXSurface(L, -4);
+  if (sgfx_fill_circle(surface, cx, cy, r) == SGFX_OK) {
     lua_pushboolean(L, true);
     return 1;
   } else {
@@ -264,7 +302,9 @@ static const struct luaL_Reg sgfx[] = {
     {"clear_surface", _lua_sgfx_clear_surface},
     {"dump_surface", _lua_sgfx_dump_surface},
     {"draw_point", _lua_sgfx_draw_point},
-    {"draw_rect", _lua_sgfx_draw_rect},
+    {"draw_line", _lua_sgfx_draw_line},
+    {"draw_circle", _lua_sgfx_draw_circle},
+    {"fill_circle", _lua_sgfx_fill_circle},
     {"flip", _lua_sgfx_flip},
     {"destroy_surface", _lua_sgfx_destroy_surface},
     {NULL, NULL}};
